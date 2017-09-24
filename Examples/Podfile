@@ -1,0 +1,16 @@
+platform :ios, '8.0'
+
+project '../MCWebSocket.xcodeproj'
+workspace 'WebSocketExample.xcworkspace'
+
+use_frameworks!
+pod "CocoaAsyncSocket"
+pod "GTMBase64"
+pod "SocketRocket"
+
+target 'MCWebSocket' do
+end
+
+target 'iOSExample' do
+	project 'iOSExample/iOSExample.xcodeproj'
+end

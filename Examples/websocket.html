@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=1" /> 
+	<meta charset="UTF-8">
+	<title>WebSocket客户端调试</title>
+	<script type="text/javascript">
+		function startWS(url) {
+		var client = new WebSocket(url);
+		client.onopen = function() {
+			console.log("opened");
+			var msg = "-----begin";
+			for (var i = 0; i < 300 - 18; i++) {
+				msg += 'a';
+			}
+			msg += "-----end";
+			console.log("length: "+msg.length);
+			client.send(msg);
+		};
+
+		client.onerror = function(event) {
+			console.error(event);
+		};
+
+		client.onclose = function(event) {
+			console.log("close");
+		};
+
+		client.onmessage = function(event) {
+			console.log(event);
+		};
+		}
+	</script>
+</head>
+<body>
+<button onclick="startWS('ws://192.168.2.27:8090/WSServer/mc')">调试WebSocket</button>
+<button onclick="startWS('ws://192.168.2.27:1688/chat')">调试WebSocket(OC)</button>
+</body>
+</html>
