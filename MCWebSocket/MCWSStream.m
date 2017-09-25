@@ -137,19 +137,17 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
                 }
                 uint32_t mask = *(uint32_t *)(buffer + pos);
                 pos += 4;
-                char b[UINT8_MAX] = {0};
-                uint64_t pageSize = sizeof(b);
+                const uint64_t pageSize = UINT16_MAX;
                 NSMutableData *msgData = [NSMutableData data];
                 uint64_t pageCount = payLoadLength/pageSize + (payLoadLength%pageSize>0?1:0);
                 for(uint64_t i = 0; i < pageCount; i++) {
+                    char b[pageSize] = {0};
                     for (uint64_t j = i*pageSize; j < (i+1)*pageSize && j < payLoadLength; j++) {
                         b[j - i*pageSize] = buffer[pos + j] ^ ((uint8_t*)(&mask))[j%4];
                     }
-                    [msgData appendBytes:b length:strlen(b)];
-                    memset(b, 0, UINT8_MAX);
+                    [msgData appendBytes:b length:i == pageCount-1?MAX(payLoadLength%pageSize, 0):pageSize];
                 }
-                MCLogWarn(@"%@", [[NSString alloc] initWithData:msgData encoding:NSUTF8StringEncoding]);
-                NSData *responseData = [self createFrameWithOpcode:WSOpCodeTextFrame data:[@"we have recieved your message." dataUsingEncoding:NSUTF8StringEncoding]];
+                NSData *responseData = [self createFrameWithOpcode:WSOpCodeTextFrame data:msgData];
                 [sock writeData:responseData withTimeout:5.0 tag:tag];
             }else {
                 [sock disconnectAfterReading];
