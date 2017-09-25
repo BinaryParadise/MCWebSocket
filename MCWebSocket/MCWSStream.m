@@ -32,7 +32,7 @@ typedef struct {
     uint64_t payload_length;
 } frame_header;
 
-/* From RFC:
+/* From RFC6455:
  
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -114,10 +114,11 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
         if (secWSKey) {
             //踩坑①：没有把Sec-WebSocket-Key去掉导致握手失败
             //踩坑②：sha1、base64的算法错误导致握手失败
+            //踩坑③：Safari的响应代码101需要说明,否则握手失败
             secWSKey = [secWSKey substringFromIndex:kMCSecWebSocketKey.length+2];
             NSString *secWSAccpet = [secWSKey stringByAppendingString:@"258EAFA5-E914-47DA-95CA-C5AB0DC85B11"];
-            NSString *handshakeString = [NSString stringWithFormat:@"HTTP/1.1 101\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %@\r\n\r\n", secWSAccpet.sha1AndBase64String];
-            [sock writeData:[handshakeString dataUsingEncoding:NSISOLatin1StringEncoding] withTimeout:5.0 tag:tag];
+            NSString *handshakeString = [NSString stringWithFormat:@"HTTP/1.1 101 WebSocket Protocol Handshake\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %@\r\n\r\n", secWSAccpet.sha1AndBase64String];
+            [sock writeData:[handshakeString dataUsingEncoding:NSASCIIStringEncoding] withTimeout:5.0 tag:tag];
         }
     }else {
         uint8_t *buffer = (uint8_t *)data.bytes;

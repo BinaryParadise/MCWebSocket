@@ -8,7 +8,6 @@
 
 #import "NSString+Crypto.h"
 #import <CommonCrypto/CommonDigest.h>
-@import GTMBase64;
 
 @implementation NSString (Crypto)
 

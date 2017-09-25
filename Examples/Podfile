@@ -5,7 +5,6 @@ workspace 'WebSocketExample.xcworkspace'
 
 use_frameworks!
 pod "CocoaAsyncSocket"
-pod "GTMBase64"
 pod "SocketRocket"
 
 target 'MCWebSocket' do
