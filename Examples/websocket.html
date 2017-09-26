@@ -7,16 +7,13 @@
 	<script type="text/javascript">
 		var client;
 		function startWS(url) {
-			client = new WebSocket(url);
+			if (typeof(WebSocket) == "function") {
+				client = new WebSocket(url);
+			}else {
+				client = new window.MozWebSocket(url);
+			}
 			client.onopen = function() {
-				console.log("opened");
-				var msg = "-----begin";
-				for (var i = 0; i < 300 - 18; i++) {
-					msg += 'a';
-				}
-				msg += "-----end";
-				console.log("length: "+msg.length);
-				client.send(msg);
+				console.log(client.url + " 连接成功...");
 			};
 
 			client.onerror = function(event) {
@@ -24,23 +21,30 @@
 			};
 
 			client.onclose = function(event) {
-				console.log("close");
+				console.log(event);
 			};
 
 			client.onmessage = function(event) {
-				console.log(event);
+				console.log("onmessage: "+(event.data));
 			};
 		}
 
 		function sendMessage() {
 			if (client != undefined) {
-				client.send("send message from webbrowser.");
+				var msg = '';
+				for (var i = 0; i < 65536; i++) {
+					msg += 'a';
+				}
+				msg += '';
+				client.send(msg);
+				client.msg = msg;
+				console.warn((/function\s*(\w*)/i.exec(arguments.callee.toString())[1])+": length="+msg.length);
 			}
 		}
 	</script>
 </head>
 <body>
-<button onclick="startWS('ws://192.168.15.80:21688/livelog')">调试WebSocket</button>
+<button onclick="startWS('ws://192.168.15.80:8090/ws')">调试WebSocket</button>
 <button onclick="startWS('ws://192.168.15.80:1688/chat')">调试WebSocket(OC)</button>
 <br />
 <button onclick="sendMessage()">发送消息</button>

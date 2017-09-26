@@ -60,6 +60,10 @@ static const uint8_t WSRsvMask          = 0x70;
 static const uint8_t WSMaskMask         = 0x80;
 static const uint8_t WSPayloadLenMask   = 0x7F;
 
+#define WS_TAG_HTTPREQ  100
+#define WS_TAG_PREFIX   200
+#define WS_TAG_PAYLOAD  300
+
 @import CocoaAsyncSocket;
 
 @interface MCWSStream () <GCDAsyncSocketDelegate>
@@ -86,7 +90,7 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
     @synchronized (self.mdict) {
         [self.mdict setObject:newSocket forKey:@(newSocket.hash)];
     }
-    [newSocket readDataWithTimeout:5.0 tag:0];
+    [newSocket readDataWithTimeout:-1 tag:WS_TAG_HTTPREQ];
 }
 
 - (void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port {
@@ -106,8 +110,7 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
  * Not called if there is an error.
  **/
 - (void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag {
-    BOOL isHTTPReq = ((uint8_t *)data.bytes)[0] == 71;
-    if (isHTTPReq) {
+    if (tag == WS_TAG_HTTPREQ) {
         NSString *reqString = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
         NSArray<NSString *> *allHeaders = [reqString componentsSeparatedByString:@"\r\n"];
         NSString *secWSKey = [allHeaders filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF BEGINSWITH 'Sec-WebSocket-Key:'"]].firstObject;
@@ -120,7 +123,10 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
             NSString *handshakeString = [NSString stringWithFormat:@"HTTP/1.1 101 WebSocket Protocol Handshake\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %@\r\n\r\n", secWSAccpet.sha1AndBase64String];
             [sock writeData:[handshakeString dataUsingEncoding:NSASCIIStringEncoding] withTimeout:5.0 tag:tag];
         }
-    }else {
+        [sock readDataWithTimeout:-1 tag:WS_TAG_PREFIX];
+        return;
+    }else if(tag == WS_TAG_PREFIX) {
+        MCLogWarn(@"%zd", data.length);
         uint8_t *buffer = (uint8_t *)data.bytes;
         WSOpCode opcode = buffer[0] & WSOpCodeMask;
         if (opcode == WSOpCodeTextFrame) {
@@ -135,27 +141,39 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
                     payLoadLength = EndianU64_BtoN(*(uint64_t *)(buffer + pos));
                     pos += 8;
                 }
-                uint32_t mask = *(uint32_t *)(buffer + pos);
-                pos += 4;
-                const uint64_t pageSize = UINT16_MAX;
-                NSMutableData *msgData = [NSMutableData data];
-                uint64_t pageCount = payLoadLength/pageSize + (payLoadLength%pageSize>0?1:0);
-                for(uint64_t i = 0; i < pageCount; i++) {
-                    char b[pageSize] = {0};
-                    for (uint64_t j = i*pageSize; j < (i+1)*pageSize && j < payLoadLength; j++) {
-                        b[j - i*pageSize] = buffer[pos + j] ^ ((uint8_t*)(&mask))[j%4];
+                if (payLoadLength > UINT16_MAX) {
+                    //暂不支持大于65535的数据长度
+                    NSString *msg = [NSString stringWithFormat:@"WebSocket Data length too large: %zd, max payload: %d", payLoadLength, UINT16_MAX];
+                    NSMutableData *msgData = [NSMutableData data];
+                    [msgData appendBytes:"\x3\xf0" length:2];
+                    [msgData appendBytes:msg.UTF8String length:msg.length];
+                    NSData *responseData = [self createFrameWithOpcode:WSOpCodeConnectionClose data:msgData];
+                    [sock writeData:responseData withTimeout:5.0 tag:tag];
+                }else {
+                    uint32_t mask = *(uint32_t *)(buffer + pos);
+                    pos += 4;
+                    const uint64_t pageSize = UINT16_MAX;
+                    NSMutableData *msgData = [NSMutableData data];
+                    uint64_t pageCount = payLoadLength/pageSize + (payLoadLength%pageSize>0?1:0);
+                    for(uint64_t i = 0; i < pageCount; i++) {
+                        char b[pageSize] = {0};
+                        for (uint64_t j = i*pageSize; j < (i+1)*pageSize && j < payLoadLength; j++) {
+                            b[j - i*pageSize] = buffer[pos + j] ^ ((uint8_t*)(&mask))[j%4];
+                            if (b[j - i *pageSize] != 'a') {
+                                MCLogWarn(@"");
+                            }
+                        }
+                        [msgData appendBytes:b length:i > 0 && i == pageCount-1?MAX(payLoadLength%pageSize, 0):pageSize];
                     }
-                    [msgData appendBytes:b length:i == pageCount-1?MAX(payLoadLength%pageSize, 0):pageSize];
+                    NSData *responseData = [self createFrameWithOpcode:WSOpCodeTextFrame data:msgData];
+                    [sock writeData:responseData withTimeout:5.0 tag:tag];
                 }
-                NSData *responseData = [self createFrameWithOpcode:WSOpCodeTextFrame data:msgData];
-                [sock writeData:responseData withTimeout:5.0 tag:tag];
             }else {
                 [sock disconnectAfterReading];
                 return;
             }
         }
     }
-    [sock readDataWithTimeout:-1 tag:tag];
 }
 
 /**
@@ -166,6 +184,7 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
 - (void)socket:(GCDAsyncSocket *)sock didReadPartialDataOfLength:(NSUInteger)partialLength tag:(long)tag {
     
     MCLogWarn(@"partialLength： %zd", partialLength);
+    [sock readDataToLength:partialLength withTimeout:-1 tag:tag];
 }
 
 /**
@@ -223,38 +242,34 @@ completionHandler:(void (^)(BOOL shouldTrustPeer))completionHandler {
 #pragma mark - Private
 
 - (NSData *)createFrameWithOpcode:(WSOpCode)opcode data:(NSData *)data {
-    NSMutableData *frame = [NSMutableData dataWithLength:data.length + 32];
-    uint8_t *buffer = (uint8_t *)[frame mutableBytes];
-    buffer[0] = WSFinMask | opcode;
-    buffer[1] &= WSMaskMask;
+    NSMutableData *frameData = nil;
+    NSUInteger length = data.length;
     
-    const uint8_t *unmaskedPayload = data.bytes;
-    size_t payLoadLength = data.length;
-    size_t bufferSize = 2;
-    if (payLoadLength < 126) {
-        buffer[1] |= payLoadLength;
-    }else if (payLoadLength <= UINT16_MAX) {
-        buffer[1] |= 126;
-        *((uint16_t *)(buffer + bufferSize)) = EndianU16_BtoN((uint16_t)payLoadLength);
-        bufferSize += sizeof(uint16_t);
-    }else {
-        buffer[1] |= 127;
-        *((uint16_t *)(buffer + bufferSize)) = EndianU64_BtoN((uint64_t)payLoadLength);
-        bufferSize += sizeof(uint64_t);
+    if (length <= 125) {
+        frameData = [NSMutableData dataWithCapacity:length + 2];
+        [frameData appendBytes:"\x81" length:1];
+        UInt8 len = (UInt8)length;
+        [frameData appendBytes:&len length:1];
+        [frameData appendData:data];
+    } else if (length <= 0xFFFF) {
+        frameData = [NSMutableData dataWithCapacity:length + 4];
+        [frameData appendBytes:"\x81\x7E" length:2];
+        UInt16 len = (UInt16)length;
+        [frameData appendBytes:(UInt8[]){len >> 8, len & 0xFF} length:2];
+        [frameData appendData:data];
+    } else {
+        frameData = [NSMutableData dataWithCapacity:(length + 10)];
+        [frameData appendBytes: "\x81\x7F" length:2];
+        [frameData appendBytes: (UInt8[]){0, 0, 0, 0, (UInt8)(length >> 24), (UInt8)(length >> 16), (UInt8)(length >> 8), length & 0xFF} length:8];
+        [frameData appendData:data];
     }
-    
-#ifdef WSUseMask
-    uint8_t *mask_key = buffer + bufferSize;
-    //TODO
-#else
-    for (size_t i = 0; i < payLoadLength; i++) {
-        buffer[bufferSize] = unmaskedPayload[i];
-        bufferSize += 1;
-    }
-#endif
-    frame.length = bufferSize;
-    
-    return frame;
+    uint8_t *buffer = (uint8_t *)frameData.mutableBytes;
+    buffer[0] = WSMaskMask | opcode;
+    return frameData;
+}
+
+- (void)didReceiveMessage:(NSString *)msg {
+
 }
 
 @end
