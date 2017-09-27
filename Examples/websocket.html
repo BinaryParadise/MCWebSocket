@@ -7,11 +7,12 @@
 	<script type="text/javascript">
 		var client;
 		function startWS(url) {
-			if (typeof(WebSocket) == "function") {
+			if (WebSocket != undefined) {
 				client = new WebSocket(url);
 			}else {
 				client = new window.MozWebSocket(url);
 			}
+			client.binaryType = "arraybuffer";
 			client.onopen = function() {
 				console.log(client.url + " 连接成功...");
 			};
@@ -25,20 +26,20 @@
 			};
 
 			client.onmessage = function(event) {
-				console.log("onmessage: "+(event.data));
+				console.log("onmessage: length="+(event.data.length));
 			};
 		}
 
 		function sendMessage() {
 			if (client != undefined) {
 				var msg = '';
-				for (var i = 0; i < 65536; i++) {
+				for (var i = 0; i < 16384; i++) {
 					msg += 'a';
 				}
 				msg += '';
 				client.send(msg);
 				client.msg = msg;
-				console.warn((/function\s*(\w*)/i.exec(arguments.callee.toString())[1])+": length="+msg.length);
+				console.info((/function\s*(\w*)/i.exec(arguments.callee.toString())[1])+": length="+msg.length);
 			}
 		}
 	</script>
