@@ -11,7 +11,7 @@
  github：https://github.com/mylcode/MCWebSocket
  */
 
-#import <UIKit/UIKit.h>
+@import Foundation;
 
 //! Project version number for MCWebSocket.
 FOUNDATION_EXPORT double MCWebSocketVersionNumber;
