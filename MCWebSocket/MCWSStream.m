@@ -8,7 +8,11 @@
 
 #import "MCWSStream.h"
 #import "NSString+Crypto.h"
+#if TARGET_OS_IPHONE
 #include <Endian.h>
+#else
+#include <machine/endian.h>
+#endif
 
 #define kMCSecWebSocketKey  @"Sec-WebSocket-Key"
 
@@ -44,7 +48,6 @@ typedef enum  {
  +---------------------------------------------------------------+
  */
 
-static const uint8_t WSFinMask          = 0x80;
 static const uint8_t WSOpCodeMask       = 0x0F;
 static const uint8_t WSRsvMask          = 0x70;
 static const uint8_t WSMaskMask         = 0x80;
