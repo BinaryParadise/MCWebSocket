@@ -5,6 +5,7 @@ workspace 'WebSocketExample.xcworkspace'
 
 use_frameworks!
 pod "CocoaAsyncSocket"
+#pod "MCWebSocket", :git => 'https://github.com/mylcode/MCWebSocket.git'
 
 target 'MCWebSocket' do
 end

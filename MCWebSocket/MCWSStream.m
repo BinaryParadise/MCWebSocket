@@ -76,7 +76,9 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
 
 @end
 
-@interface MCWSStream () <GCDAsyncSocketDelegate>
+@interface MCWSStream () <GCDAsyncSocketDelegate> {
+    __weak id<MCWSStreamDelegate> delegate;
+}
 
 @property (nonatomic, strong) GCDAsyncSocket *asyncSocket;
 @property (nonatomic, strong) NSMutableDictionary *mdict;
@@ -85,7 +87,8 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
 
 @implementation MCWSStream
 
-- (void)startWithPort:(UInt16)wsport {
+- (void)startWithDelegate:(id<MCWSStreamDelegate>)aDelegate port:(UInt16)wsport {
+    delegate = aDelegate;
     self.asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_global_queue(0, 0)];
     NSError *error;
     [self.asyncSocket acceptOnPort:wsport error:&error];
@@ -121,6 +124,9 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
             NSString *secWSAccpet = [secWSKey stringByAppendingString:@"258EAFA5-E914-47DA-95CA-C5AB0DC85B11"];
             NSString *handshakeString = [NSString stringWithFormat:@"HTTP/1.1 101 WebSocket Protocol Handshake\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %@\r\n\r\n", secWSAccpet.sha1AndBase64String];
             [sock writeData:[handshakeString dataUsingEncoding:NSASCIIStringEncoding] withTimeout:5.0 tag:tag];
+        }
+        if ([delegate respondsToSelector:@selector(webSocket:didHandshake:)]) {
+            [delegate webSocket:self didHandshake:secWSKey];
         }
         [sock readDataToLength:1 withTimeout:-1 tag:TAG_PREFIX];
     }else if(tag == TAG_PREFIX) {
@@ -188,6 +194,9 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
         [msgData appendBytes:payLoad length:payLoadLength];
         NSData *responseData = [self createFrameWithOpcode:WSOpCodeTextFrame data:msgData];
         [sock writeData:responseData withTimeout:-1 tag:0];
+        if ([delegate respondsToSelector:@selector(webSocket:didReceiveMessage:)]) {
+            [delegate webSocket:self didReceiveMessage:[[NSString alloc] initWithBytes:payLoad length:payLoadLength encoding:NSUTF8StringEncoding]];
+        }
         [sock readDataToLength:1 withTimeout:-1 tag:TAG_PREFIX];
     }
 }

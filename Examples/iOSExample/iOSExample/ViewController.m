@@ -9,11 +9,8 @@
 #import "ViewController.h"
 
 @import MCWebSocket;
-@import SocketRocket;
 
-@interface ViewController () <SRWebSocketDelegate> {
-    SRWebSocket *_srweb;
-}
+@interface ViewController () <MCWSStreamDelegate>
 
 @property (nonatomic, strong) MCWSStream *wsStream;
 
@@ -25,24 +22,22 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     self.wsStream = [[MCWSStream alloc] init];
-    [self.wsStream startWithPort:1688];
-    
-    _srweb = [[SRWebSocket alloc] initWithURL:[NSURL URLWithString:@"http://192.168.2.27:1688"]];
-    _srweb.delegate = self;
-    //[_srweb open];
-}
-
-- (void)webSocket:(SRWebSocket *)webSocket didReceiveMessage:(id)message {
-    NSLog(@"%@", message);
-}
-
-- (void)webSocketDidOpen:(SRWebSocket *)webSocket {
-    [webSocket send:@"send message with websocket."];
+    [self.wsStream startWithDelegate:self port:1688];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - MCWSStreamDelegate
+
+- (void)webSocket:(MCWSStream *)steam didHandshake:(BOOL)result {
+    MCLogInfo(@"握手成功");
+}
+
+- (void)webSocket:(MCWSStream *)steam didReceiveMessage:(NSString *)message {
+    MCLogInfo(@"%@", message);
 }
 
 

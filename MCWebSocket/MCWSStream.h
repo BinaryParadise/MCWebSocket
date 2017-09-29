@@ -25,13 +25,24 @@
 #define NSLog(...)
 #endif
 
+@protocol MCWSStreamDelegate;
+
 @interface MCWSStream : NSObject
 
 /**
  开启WebSocket服务
 
+ @param delegate 代理
  @param wsport 端口
  */
-- (void)startWithPort:(UInt16)wsport;
+- (void)startWithDelegate:(id<MCWSStreamDelegate>)delegate port:(UInt16)wsport;
+
+@end
+
+@protocol MCWSStreamDelegate <NSObject>
+
+- (void)webSocket:(MCWSStream *)steam didHandshake:(BOOL)result;
+
+- (void)webSocket:(MCWSStream *)steam didReceiveMessage:(NSString *)message;
 
 @end
