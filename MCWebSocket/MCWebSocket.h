@@ -6,6 +6,11 @@
 //  Copyright © 2017年 mylcode. All rights reserved.
 //
 
+/**
+ version：1.0.0
+ github：https://github.com/mylcode/MCWebSocket
+ */
+
 #import <UIKit/UIKit.h>
 
 //! Project version number for MCWebSocket.
