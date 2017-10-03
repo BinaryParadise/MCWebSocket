@@ -4,7 +4,17 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=1" /> 
 	<meta charset="UTF-8">
 	<title>WebSocket客户端调试</title>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script type="text/javascript">
+		jQuery(function(){
+
+			startWS('ws://127.0.0.1:1688/chat');
+			var sql = localStorage.getItem("sql");
+			if (sql != null) {
+				$("#sql").val(localStorage.getItem("sql"));
+			}
+		});
+
 		var client;
 		function startWS(url) {
 			if (WebSocket != undefined) {
@@ -26,28 +36,124 @@
 			};
 
 			client.onmessage = function(event) {
-				console.log("onmessage: length="+(event.data.length));
+				var obj = eval('('+event.data+')');
+				if (obj.code == 0) {
+					var data = obj.data;
+					var result = "<tr>";
+					for (var i = 0; i < data[0].length; i++) {
+						result += "<th scope='col'>" +data[0][i]+ "</th>";
+					}
+					result += "</tr>";
+					for (var i = 1; i < data.length; i++) {
+						result += "<tr>";
+						for(var item in data[i]) {
+							result += "<td>"+data[i][item]+"</td>";
+						}
+						result += "</tr>";
+					}
+
+					$("#rstable").html(result);
+				}else {
+					$("#rstable").text(obj.msg);
+				}
+
 			};
 		}
 
 		function sendMessage() {
-			if (client != undefined) {
-				var msg = '';
-				for (var i = 0; i < 16384; i++) {
-					msg += 'a';
-				}
-				msg += '';
+			if (client != undefined) {0
+				var msg = $("#sql").val();
+				localStorage.setItem("sql",msg);
 				client.send(msg);
-				client.msg = msg;
 				console.info((/function\s*(\w*)/i.exec(arguments.callee.toString())[1])+": length="+msg.length);
+			}else {
+				console.error("WebSocket未初始化");
 			}
 		}
 	</script>
+	<style type="text/css">
+body {
+font: normal 11px auto "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+color: #4f6b72;
+background: #E6EAE9;
+}
+
+a {
+color: #c75f3e;
+}
+
+#mytable {
+width: 700px;
+padding: 0;
+margin: 0;
+}
+
+caption {
+padding: 0 0 5px 0;
+width: 700px;
+font: italic 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+text-align: right;
+}
+
+th {
+font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+color: #4f6b72;
+border-right: 1px solid #C1DAD7;
+border-bottom: 1px solid #C1DAD7;
+border-top: 1px solid #C1DAD7;
+letter-spacing: 2px;
+text-transform: uppercase;
+text-align: left;
+padding: 6px 6px 6px 12px;
+background: #CAE8EA no-repeat;
+}
+
+th.nobg {
+border-top: 0;
+border-left: 0;
+border-right: 1px solid #C1DAD7;
+background: none;
+}
+
+td {
+border-right: 1px solid #C1DAD7;
+border-bottom: 1px solid #C1DAD7;
+background: #fff;
+font-size:11px;
+padding: 6px 6px 6px 12px;
+color: #4f6b72;
+}
+
+
+td.alt {
+background: #F5FAFA;
+color: #797268;
+}
+
+th.spec {
+border-left: 1px solid #C1DAD7;
+border-top: 0;
+background: #fff no-repeat;
+font: bold 10px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+}
+
+th.specalt {
+border-left: 1px solid #C1DAD7;
+border-top: 0;
+background: #f5fafa no-repeat;
+font: bold 10px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+color: #797268;
+}
+	</style>
 </head>
 <body>
-<button onclick="startWS('ws://192.168.15.80:8090/ws')">调试WebSocket</button>
-<button onclick="startWS('ws://192.168.15.80:1688/chat')">调试WebSocket(OC)</button>
-<br />
-<button onclick="sendMessage()">发送消息</button>
+	<div id="p">	
+	<textarea id="sql" rows="10" cols="100">select id,datetime(time,'unixepoch','localtime') as time,sql from CallLog</textarea>
+	<button onclick="sendMessage()" style="width: 68px;height: 36px;">执行</button>
+	</div>
+	<div id="result">
+		<table id="rstable" cellspacing="0">
+		</table>
+	</div>
 </body>
 </html>
