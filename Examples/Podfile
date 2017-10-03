@@ -12,4 +12,6 @@ end
 
 target 'iOSExample' do
 	project 'iOSExample/iOSExample.xcodeproj'
+    pod 'FMDB'
+    pod 'MCJSONKit', :git => 'https://github.com/mylcode/MCJSONKit.git'
 end

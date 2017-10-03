@@ -14,7 +14,7 @@
 		C5371AB71F76133700415F9E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C5371AB51F76133700415F9E /* Main.storyboard */; };
 		C5371AB91F76133700415F9E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C5371AB81F76133700415F9E /* Assets.xcassets */; };
 		C5371ABC1F76133700415F9E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C5371ABA1F76133700415F9E /* LaunchScreen.storyboard */; };
-		C5AD3DAB1F761D90000D4E11 /* MCWebSocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5AD3DAA1F761D90000D4E11 /* MCWebSocket.framework */; };
+		C59F40C31F835ACA00A5801C /* MCWebSocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C59F40C21F835ACA00A5801C /* MCWebSocket.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,7 +30,7 @@
 		C5371AB81F76133700415F9E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C5371ABB1F76133700415F9E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C5371ABD1F76133700415F9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C5AD3DAA1F761D90000D4E11 /* MCWebSocket.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MCWebSocket.framework; path = "../../../../Library/Developer/Xcode/DerivedData/MCWebSocket-ffnhystibjfdoggjrhrbggjefxux/Build/Products/Debug-iphonesimulator/MCWebSocket.framework"; sourceTree = "<group>"; };
+		C59F40C21F835ACA00A5801C /* MCWebSocket.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MCWebSocket.framework; path = "../../../../Library/Developer/Xcode/DerivedData/WebSocketExample-eczevrwiqkqphsagtyfbcjdlxujv/Build/Products/Debug-iphonesimulator/MCWebSocket.framework"; sourceTree = "<group>"; };
 		E47F902676456DE07DA2496D /* Pods-iOSExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iOSExample.release.xcconfig"; path = "../Pods/Target Support Files/Pods-iOSExample/Pods-iOSExample.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -39,7 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C5AD3DAB1F761D90000D4E11 /* MCWebSocket.framework in Frameworks */,
+				C59F40C31F835ACA00A5801C /* MCWebSocket.framework in Frameworks */,
 				0DB51F3941609AFFAD975F10 /* Pods_iOSExample.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -101,7 +101,7 @@
 		C558065D1F7617BA0025CD52 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				C5AD3DAA1F761D90000D4E11 /* MCWebSocket.framework */,
+				C59F40C21F835ACA00A5801C /* MCWebSocket.framework */,
 				A92430951F3DB0AE436C9019 /* Pods_iOSExample.framework */,
 			);
 			name = Frameworks;
@@ -219,10 +219,14 @@
 			inputPaths = (
 				"${SRCROOT}/../Pods/Target Support Files/Pods-iOSExample/Pods-iOSExample-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CocoaAsyncSocket/CocoaAsyncSocket.framework",
+				"${BUILT_PRODUCTS_DIR}/FMDB/FMDB.framework",
+				"${BUILT_PRODUCTS_DIR}/MCJSONKit/MCJSONKit.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CocoaAsyncSocket.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FMDB.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MCJSONKit.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

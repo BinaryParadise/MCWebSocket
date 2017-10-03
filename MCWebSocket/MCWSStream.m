@@ -81,6 +81,7 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
 }
 
 @property (nonatomic, strong) GCDAsyncSocket *asyncSocket;
+@property (nonatomic, weak) GCDAsyncSocket *contextSock;
 @property (nonatomic, strong) NSMutableDictionary *mdict;
 
 @end
@@ -94,6 +95,14 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
     [self.asyncSocket acceptOnPort:wsport error:&error];
     MCLogError(@"%@", error);
     self.mdict = [NSMutableDictionary dictionary];
+}
+
+- (void)sendMessage:(NSString *)message withTag:(long)tag {
+    GCDAsyncSocket *sock = self.mdict[@(tag)];
+    if (sock) {
+        NSData *responseData = [self createFrameWithOpcode:WSOpCodeTextFrame data:[message dataUsingEncoding:NSUTF8StringEncoding]];
+        [sock writeData:responseData withTimeout:-1 tag:0];
+    }
 }
 
 #pragma mark - GCDAsyncSocketDelegate
@@ -126,14 +135,30 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
             [sock writeData:[handshakeString dataUsingEncoding:NSASCIIStringEncoding] withTimeout:5.0 tag:tag];
         }
         if ([delegate respondsToSelector:@selector(webSocket:didHandshake:)]) {
-            [delegate webSocket:self didHandshake:secWSKey];
+            MCWSStream *stream = [MCWSStream new];
+            stream.contextSock = sock;
+            [delegate webSocket:stream didHandshake:secWSKey];
         }
         [sock readDataToLength:1 withTimeout:-1 tag:TAG_PREFIX];
     }else if(tag == TAG_PREFIX) {
         UInt8 *pFrame = (UInt8 *)[data bytes];
         UInt8 frame = *pFrame;
         if ([self isValidWebSocketFrame:frame]) {
-            [sock readDataToLength:1 withTimeout:-1 tag:TAG_PAYLOAD_LENGTH];
+            WSOpCode opcode = frame & WSOpCodeMask;
+            switch (opcode) {
+                case WSOpCodePing:
+                    MCLogInfo(@"WSOpCodePing");
+                    break;
+                case WSOpCodePong:
+                    MCLogInfo(@"WSOpCodePong");
+                    break;
+                case WSOpCodeConnectionClose:
+                    [sock disconnectAfterReading];
+                    break;
+                default:
+                    [sock readDataToLength:1 withTimeout:-1 tag:TAG_PAYLOAD_LENGTH];
+                    break;
+            }
         }else {
             NSString *msg = [NSString stringWithFormat:@"Unknown frame opcode."];
             NSMutableData *msgData = [NSMutableData data];
@@ -192,10 +217,10 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
             payLoad[i] = payLoad[i] ^ mask[i % 4];
         }
         [msgData appendBytes:payLoad length:payLoadLength];
-        NSData *responseData = [self createFrameWithOpcode:WSOpCodeTextFrame data:msgData];
-        [sock writeData:responseData withTimeout:-1 tag:0];
-        if ([delegate respondsToSelector:@selector(webSocket:didReceiveMessage:)]) {
-            [delegate webSocket:self didReceiveMessage:[[NSString alloc] initWithBytes:payLoad length:payLoadLength encoding:NSUTF8StringEncoding]];
+        //NSData *responseData = [self createFrameWithOpcode:WSOpCodeTextFrame data:msgData];
+        //[sock writeData:responseData withTimeout:-1 tag:0];
+        if ([delegate respondsToSelector:@selector(webSocket:didReceiveMessage:withTag:)]) {
+            [delegate webSocket:self didReceiveMessage:[[NSString alloc] initWithBytes:payLoad length:payLoadLength encoding:NSUTF8StringEncoding] withTag:sock.hash];
         }
         [sock readDataToLength:1 withTimeout:-1 tag:TAG_PREFIX];
     }
@@ -274,10 +299,6 @@ completionHandler:(void (^)(BOOL shouldTrustPeer))completionHandler {
     uint8_t *buffer = (uint8_t *)frameData.mutableBytes;
     buffer[0] = WSMaskMask | opcode;
     return frameData;
-}
-
-- (void)didReceiveMessage:(NSString *)msg {
-
 }
 
 @end
