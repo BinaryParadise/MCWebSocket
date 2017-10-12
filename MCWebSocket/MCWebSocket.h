@@ -11,7 +11,7 @@
  github：https://github.com/mylcode/MCWebSocket
  */
 
-@import Foundation;
+#import <Foundation/Foundation.h>
 
 //! Project version number for MCWebSocket.
 FOUNDATION_EXPORT double MCWebSocketVersionNumber;
