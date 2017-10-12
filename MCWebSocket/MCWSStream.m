@@ -61,7 +61,7 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
 #define TAG_MASKEDKEY           206
 #define TAG_PAYLOAD             207
 
-@import CocoaAsyncSocket;
+#import <CocoaAsyncSocket/GCDAsyncSocket.h>
 
 @interface MCWSFrame : NSObject
 
