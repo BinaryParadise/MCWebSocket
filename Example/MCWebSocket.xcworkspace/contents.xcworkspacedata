@@ -2,10 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:iOSExample/iOSExample.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:../MCWebSocket.xcodeproj">
+      location = "group:MCWebSocket.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
