@@ -1,17 +1,26 @@
-[English](README_en.md)
+# MCWebSocket
 
-# WebSocketKit
-WebSocketKit是WebSocket协议用objective-c语言的一个简单实现。
+[![CI Status](http://img.shields.io/travis/mylcode/MCWebSocket.svg?style=flat)](https://travis-ci.org/mylcode/MCWebSocket)
+[![Version](https://img.shields.io/cocoapods/v/MCWebSocket.svg?style=flat)](http://cocoapods.org/pods/MCWebSocket)
+[![License](https://img.shields.io/cocoapods/l/MCWebSocket.svg?style=flat)](http://cocoapods.org/pods/MCWebSocket)
+[![Platform](https://img.shields.io/cocoapods/p/MCWebSocket.svg?style=flat)](http://cocoapods.org/pods/MCWebSocket)
 
-[协议官方文档](https://tools.ietf.org/html/rfc6455)
-------
-# System reqiured
--------
-iOS 8.0
+## Example
 
-macOS 10.9
+To run the example project, clone the repo, and run `pod install` from the Example directory first.
 
-# 实现步骤
+## Requirements
+
+## Installation
+
+MCWebSocket is available through [CocoaPods](http://cocoapods.org). To install
+it, simply add the following line to your Podfile:
+
+```ruby
+pod 'MCWebSocket'
+```
+
+## 实现步骤
 
 ### 一、认证握手
 
@@ -52,3 +61,7 @@ Websocket协议通过序列化的数据帧传输数据。数据封包协议中�
 ![Base Framing Protocl](images/base-framing-protocol.png)
 
 主要用到位运算：亦或、逻辑与、逻辑或
+
+## License
+
+MCWebSocket is available under the MIT license. See the LICENSE file for more info.
