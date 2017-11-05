@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
 	
 	s.default_subspec = 'standard'
 	s.requires_arc = true
-	s.xcconfig = { "GCC_PREPROCESSOR_DEFINITIONS" => "XCODECOLORS=1" }
+	s.pod_target_xcconfig = { "GCC_PREPROCESSOR_DEFINITIONS" => "XCODECOLORS=1" }
 
 	s.subspec 'standard' do |ss|
     	ss.source_files = 'MCWebSocket/Classes/*'

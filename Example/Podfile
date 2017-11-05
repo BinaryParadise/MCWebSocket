@@ -1,6 +1,3 @@
-source 'git@github.com:mylcode/Specs.git'
-source 'https://github.com/CocoaPods/Specs.git'
-
 use_frameworks!
 
 target 'MCWebSocket_Example' do
