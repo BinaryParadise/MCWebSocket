@@ -35,7 +35,7 @@
  创建测试数据库
  */
 - (void)createDatabase {
-    MCLogMark(@"%@", NSHomeDirectory());
+    MCLogDebug(@"%@", NSHomeDirectory());
     if (!self.dbPath) {
         self.dbPath = [NSHomeDirectory() stringByAppendingString:@"/Documents/websocket.sqlite"];
     }

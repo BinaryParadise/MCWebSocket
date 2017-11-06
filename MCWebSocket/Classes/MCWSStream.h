@@ -7,25 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
-#if XCODECOLORS
-#define XCODE_COLORS_ESCAPE @"\033["
-
-#define XCODE_COLORS_RESET_FG  XCODE_COLORS_ESCAPE @"fg;" // Clear any foreground color
-#define XCODE_COLORS_RESET_BG  XCODE_COLORS_ESCAPE @"bg;" // Clear any background color
-#define XCODE_COLORS_RESET     @"    " XCODE_COLORS_ESCAPE @";"   // Clear any foreground or background color
-
-#define MCLogInfo(frmt, ...) NSLog((XCODE_COLORS_ESCAPE @"fg85,85,75;%s+%d " frmt XCODE_COLORS_RESET),__func__,__LINE__, ##__VA_ARGS__);
-#define MCLogWarn(frmt, ...) NSLog((XCODE_COLORS_ESCAPE @"fg153,102,51;%s+%d " frmt XCODE_COLORS_RESET),__func__,__LINE__, ##__VA_ARGS__);
-#define MCLogMark(frmt, ...) NSLog((XCODE_COLORS_ESCAPE @"fg67,145,255;%s+%d " frmt XCODE_COLORS_RESET),__func__,__LINE__, ##__VA_ARGS__);
-#define MCLogError(frmt, ...) NSLog((XCODE_COLORS_ESCAPE @"fg255,0,0;%s+%d " frmt XCODE_COLORS_RESET),__func__,__LINE__, ##__VA_ARGS__);
-#else
-#define MCLogInfo(frmt, ...)
-#define MCLogWarn(frmt, ...)
-#define MCLogError(frmt, ...)
-#define MCLogMark(frmt, ...)
-#define NSLog(...)
-#endif
+#import "MCLogger.h"
 
 @protocol MCWSStreamDelegate;
 

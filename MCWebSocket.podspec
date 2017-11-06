@@ -17,12 +17,12 @@ Pod::Spec.new do |s|
 	
 	s.default_subspec = 'standard'
 	s.requires_arc = true
-	s.pod_target_xcconfig = { "GCC_PREPROCESSOR_DEFINITIONS" => "XCODECOLORS=1" }
 
 	s.subspec 'standard' do |ss|
     	ss.source_files = 'MCWebSocket/Classes/*'
     	ss.exclude_files    = 'MCWebSocket/Classes/DB/*'
     	ss.dependency   'CocoaAsyncSocket', '~> 7.6.0'
+        ss.dependency   'MCLogger'
   	end
 
 	s.subspec 'DB' do |ss|

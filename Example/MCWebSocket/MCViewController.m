@@ -8,8 +8,7 @@
 
 #import "MCViewController.h"
 #import <WebKit/WebKit.h>
-
-@import MCWebSocket;
+#import "MCDBStream.h"
 
 @interface MCViewController ()
     
