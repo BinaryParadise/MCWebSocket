@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		542F40235DA439CE585BE942 /* libPods-MCWebSocket_Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D0ECCBFC0C0FE27123D7D64 /* libPods-MCWebSocket_Tests.a */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
 		6003F592195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
@@ -20,11 +21,10 @@
 		6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
 		6003F5BA195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5B8195388D20070C39A /* InfoPlist.strings */; };
 		6003F5BC195388D20070C39A /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5BB195388D20070C39A /* Tests.m */; };
-		60E09FDF50A60FF567218DDB /* Pods_MCWebSocket_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7404AF2810F1D5A4F55A9ECA /* Pods_MCWebSocket_Example.framework */; };
 		71719F9F1E33DC2100824A3D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 71719F9D1E33DC2100824A3D /* LaunchScreen.storyboard */; };
 		873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 873B8AEA1B1F5CCA007FD442 /* Main.storyboard */; };
+		9C4358F38E37AE14BAFB941A /* libPods-MCWebSocket_Example.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 21CAE8B44E77128AF1D2E4CE /* libPods-MCWebSocket_Example.a */; };
 		C599F3EC1FADB81B00D19382 /* websocket.html in Resources */ = {isa = PBXBuildFile; fileRef = C599F3EB1FADB54F00D19382 /* websocket.html */; };
-		E41FF5FAF7DD9E09BFFDF7D8 /* Pods_MCWebSocket_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 422A97873C5261D6730D736C /* Pods_MCWebSocket_Tests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,7 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		422A97873C5261D6730D736C /* Pods_MCWebSocket_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MCWebSocket_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		21CAE8B44E77128AF1D2E4CE /* libPods-MCWebSocket_Example.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MCWebSocket_Example.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4990B9A28F88CEDDFB60BBD8 /* Pods-MCWebSocket_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MCWebSocket_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MCWebSocket_Tests/Pods-MCWebSocket_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		6003F58A195388D20070C39A /* MCWebSocket_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MCWebSocket_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F58D195388D20070C39A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -59,8 +59,8 @@
 		6003F5B9195388D20070C39A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		6003F5BB195388D20070C39A /* Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tests.m; sourceTree = "<group>"; };
 		606FC2411953D9B200FFA9A0 /* Tests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tests-Prefix.pch"; sourceTree = "<group>"; };
+		6D0ECCBFC0C0FE27123D7D64 /* libPods-MCWebSocket_Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MCWebSocket_Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		71719F9E1E33DC2100824A3D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		7404AF2810F1D5A4F55A9ECA /* Pods_MCWebSocket_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MCWebSocket_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		873B8AEA1B1F5CCA007FD442 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Main.storyboard; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		AD6A6E7ECDD4EE7A0E9331E3 /* Pods-MCWebSocket_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MCWebSocket_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-MCWebSocket_Example/Pods-MCWebSocket_Example.release.xcconfig"; sourceTree = "<group>"; };
 		B1CE9EF503398210074E8963 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
@@ -79,7 +79,7 @@
 				6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */,
 				6003F592195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F58E195388D20070C39A /* Foundation.framework in Frameworks */,
-				60E09FDF50A60FF567218DDB /* Pods_MCWebSocket_Example.framework in Frameworks */,
+				9C4358F38E37AE14BAFB941A /* libPods-MCWebSocket_Example.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,7 +90,7 @@
 				6003F5B0195388D20070C39A /* XCTest.framework in Frameworks */,
 				6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F5B1195388D20070C39A /* Foundation.framework in Frameworks */,
-				E41FF5FAF7DD9E09BFFDF7D8 /* Pods_MCWebSocket_Tests.framework in Frameworks */,
+				542F40235DA439CE585BE942 /* libPods-MCWebSocket_Tests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,8 +136,8 @@
 				6003F58F195388D20070C39A /* CoreGraphics.framework */,
 				6003F591195388D20070C39A /* UIKit.framework */,
 				6003F5AF195388D20070C39A /* XCTest.framework */,
-				7404AF2810F1D5A4F55A9ECA /* Pods_MCWebSocket_Example.framework */,
-				422A97873C5261D6730D736C /* Pods_MCWebSocket_Tests.framework */,
+				21CAE8B44E77128AF1D2E4CE /* libPods-MCWebSocket_Example.a */,
+				6D0ECCBFC0C0FE27123D7D64 /* libPods-MCWebSocket_Tests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

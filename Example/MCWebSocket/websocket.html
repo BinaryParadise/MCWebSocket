@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=1" /> 
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 	<meta charset="UTF-8">
 	<title>WebSocket客户端调试</title>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -76,6 +76,7 @@ body {
 font: normal 11px auto "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
 color: #4f6b72;
 background: #E6EAE9;
+margin:10px;
 }
 
 a {
@@ -83,14 +84,14 @@ color: #c75f3e;
 }
 
 #mytable {
-width: 700px;
+width: 100%;
 padding: 0;
 margin: 0;
 }
 
 caption {
 padding: 0 0 5px 0;
-width: 700px;
+width: 100%;
 font: italic 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
 text-align: right;
 }
@@ -148,7 +149,7 @@ color: #797268;
 </head>
 <body>
 	<div id="p">	
-	<textarea id="sql" rows="10" cols="100">select id,datetime(time,'unixepoch','localtime') as time,sql from CallLog</textarea>
+	<textarea id="sql" rows="10" style="width:95%;">select id,datetime(time,'unixepoch','localtime') as time,sql from CallLog</textarea>
 	<button onclick="sendMessage()" style="width: 68px;height: 36px;">执行</button>
 	</div>
 	<div id="result">
