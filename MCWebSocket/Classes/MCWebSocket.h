@@ -7,8 +7,8 @@
 //
 
 /**
- version：1.0.0
- github：https://github.com/mylcode/MCWebSocket
+ version：1.1.0
+ github：https://github.com/MC-Studio/MCWebSocket
  */
 
 #import <Foundation/Foundation.h>

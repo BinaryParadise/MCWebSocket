@@ -1,7 +1,7 @@
 platform :ios, '8.0'
 
 target 'MCWebSocket_Example' do
-  pod 'MCWebSocket/DB', :path => '../'
+  pod 'MCWebSocket/NSLog', :path => '../'
 
   target 'MCWebSocket_Tests' do
     inherit! :search_paths

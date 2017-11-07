@@ -8,13 +8,13 @@
 
 #import "MCViewController.h"
 #import <WebKit/WebKit.h>
-#import "MCDBStream.h"
+#import "MCLogStream.h"
 
 @interface MCViewController ()
     
 @property (nonatomic, strong) WKWebView *webView;
 
-@property (nonatomic, strong) MCDBStream *dbStream;
+@property (nonatomic, strong) MCLogStream *dbStream;
 
 @end
 
@@ -25,7 +25,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
-    self.dbStream = [[MCDBStream alloc] init];
+    self.dbStream = [[MCLogStream alloc] init];
     [self.dbStream startWithDelegate:nil port:1688];
     
     NSString *htmlFile = [[NSBundle mainBundle] pathForResource:@"websocket.html" ofType:nil];
