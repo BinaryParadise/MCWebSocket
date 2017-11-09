@@ -98,10 +98,25 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
 }
 
 - (void)sendMessage:(NSString *)message withTag:(long)tag {
-    GCDAsyncSocket *sock = self.mdict[@(tag)];
-    if (sock) {
-        NSData *responseData = [self createFrameWithOpcode:WSOpCodeTextFrame data:[message dataUsingEncoding:NSUTF8StringEncoding]];
-        [sock writeData:responseData withTimeout:-1 tag:0];
+    [self sendData:[message dataUsingEncoding:NSUTF8StringEncoding] withTag:tag];
+}
+
+- (void)sendData:(NSData *)data withTag:(long)tag {
+    void(^sendDataBlock)(GCDAsyncSocket *) = ^(GCDAsyncSocket *sock) {
+        if (sock) {
+            NSData *responseData = [self createFrameWithOpcode:WSOpCodeTextFrame data:data];
+            [sock writeData:responseData withTimeout:-1 tag:0];
+        }
+    };
+    
+    if (tag > 0) {
+        sendDataBlock(self.mdict[@(tag)]);
+    }else {
+        [self.mdict.allValues enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            dispatch_async(dispatch_get_global_queue(0, 0), ^{
+                sendDataBlock(obj);
+            });
+        }];
     }
 }
 

@@ -32,10 +32,4 @@ Pod::Spec.new do |s|
         ss.dependency   'MCJSONKit'
 	end
 
-	s.subspec 'NSLog' do |ss|
-		ss.source_files = 'MCWebSocket/Classes/NSLog/*'
-		ss.dependency   'MCWebSocket/standard'
-        ss.dependency   'MCJSONKit'
-	end
-
 end
