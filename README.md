@@ -1,6 +1,6 @@
 # MCWebSocket
 
-[![CI Status](http://img.shields.io/travis/mylcode/MCWebSocket.svg?style=flat)](https://travis-ci.org/MC-Studio/MCWebSocket)
+[![Build Status](https://travis-ci.org/MC-Studio/MCWebSocket.svg?branch=master)](https://travis-ci.org/MC-Studio/MCWebSocket)
 [![Version](https://img.shields.io/cocoapods/v/MCWebSocket.svg?style=flat)](http://cocoapods.org/pods/MCWebSocket)
 [![License](https://img.shields.io/cocoapods/l/MCWebSocket.svg?style=flat)](http://cocoapods.org/pods/MCWebSocket)
 [![Platform](https://img.shields.io/cocoapods/p/MCWebSocket.svg?style=flat)](http://cocoapods.org/pods/MCWebSocket)
