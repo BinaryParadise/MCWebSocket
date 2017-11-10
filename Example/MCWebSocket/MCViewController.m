@@ -8,13 +8,19 @@
 
 #import "MCViewController.h"
 #import <WebKit/WebKit.h>
-#import "MCDBStream.h"
+#import "MCWSStream.h"
 
-@interface MCViewController ()
+@interface MCViewController () <MCWSStreamDelegate> {
+    NSInteger logCount;
+}
     
 @property (nonatomic, strong) WKWebView *webView;
 
-@property (nonatomic, strong) MCDBStream *dbStream;
+@property (nonatomic, strong) MCWSStream *dbStream;
+
+@property (nonatomic, strong) NSTimer *timer;
+
+@property (nonatomic, copy) NSArray *logs;
 
 @end
 
@@ -25,19 +31,47 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
-    self.dbStream = [[MCDBStream alloc] init];
-    [self.dbStream startWithDelegate:nil port:1688];
+    self.dbStream = [[MCWSStream alloc] init];
+    [self.dbStream startWithDelegate:self port:1688];
     
-    NSString *htmlFile = [[NSBundle mainBundle] pathForResource:@"websocket.html" ofType:nil];
-    self.webView = [[WKWebView alloc] initWithFrame:self.view.bounds];
-    [self.view addSubview:self.webView];
-    [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL fileURLWithPath:htmlFile]]];
+    self.timer = [NSTimer timerWithTimeInterval:0.1 target:self selector:@selector(tickAction:) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:self.timer forMode:NSRunLoopCommonModes];
+    
+    self.logs = @[@{@"level":@(1), @"msg":@"普通信息"},
+                  @{@"level":@(2), @"msg":@"警告信息"},
+                  @{@"level":@(3), @"msg":@"调试信息，比较醒目"},
+                  @{@"level":@(4), @"msg":@"错误信息，特别醒目"}];
 }
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (void)tickAction:(NSTimer *)sender {
+    NSMutableDictionary<NSString *, NSString *> *logDict = [self.logs[arc4random()%4] mutableCopy];
+    NSString *msg = [NSString stringWithFormat:@"[%zd]%@", logCount++, logDict[@"msg"]];
+    logDict[@"msg"] = msg;
+    logDict[@"time"] = @([NSDate date].timeIntervalSince1970);
+    switch ([logDict[@"level"] intValue]) {
+        case 2:
+            MCLogWarn(@"%@", msg)
+            break;
+        case 3:
+            MCLogDebug(@"%@", msg)
+            break;
+        case 4:
+            MCLogError(@"%@", msg)
+            break;
+        default:
+            MCLogInfo(@"%@", msg)
+            break;
+    }
+    
+    NSData *data = [NSJSONSerialization dataWithJSONObject:logDict options:NSJSONWritingPrettyPrinted error:nil];
+    
+    [self.dbStream sendData:data withTag:0];
+}
+
+- (void)webSocket:(MCWSStream *)stream didHandshake:(BOOL)result {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.timer fire];
+    });
 }
 
 @end

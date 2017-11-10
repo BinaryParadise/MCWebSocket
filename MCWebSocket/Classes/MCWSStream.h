@@ -29,6 +29,14 @@
  */
 - (void)sendMessage:(NSString *)message withTag:(long)tag;
 
+/**
+ 发送数据
+ 
+ @param message 数据
+ @param tag 标识
+ */
+- (void)sendData:(NSData *)data withTag:(long)tag;
+
 @end
 
 @protocol MCWSStreamDelegate <NSObject>
