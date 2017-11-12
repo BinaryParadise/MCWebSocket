@@ -83,6 +83,7 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
 @property (nonatomic, strong) GCDAsyncSocket *asyncSocket;
 @property (nonatomic, weak) GCDAsyncSocket *contextSock;
 @property (nonatomic, strong) NSMutableDictionary *mdict;
+@property (nonatomic, strong) NSTimer *timerPing;
 
 @end
 
@@ -95,6 +96,10 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
     [self.asyncSocket acceptOnPort:wsport error:&error];
     MCLogError(@"%@", error);
     self.mdict = [NSMutableDictionary dictionary];
+    
+    self.timerPing = [NSTimer timerWithTimeInterval:5 target:self selector:@selector(tiemrPingAction:) userInfo:nil repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:self.timerPing forMode:NSRunLoopCommonModes];
+    [self.timerPing fire];
 }
 
 - (void)sendMessage:(NSString *)message withTag:(long)tag {
@@ -166,6 +171,7 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
                     break;
                 case WSOpCodePong:
                     MCLogInfo(@"WSOpCodePong");
+                    [sock readDataToLength:1 withTimeout:-1 tag:TAG_PAYLOAD_LENGTH];
                     break;
                 case WSOpCodeConnectionClose:
                     [sock disconnectAfterReading];
@@ -238,6 +244,12 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
             [delegate webSocket:self didReceiveMessage:[[NSString alloc] initWithBytes:payLoad length:payLoadLength encoding:NSUTF8StringEncoding] withTag:sock.hash];
         }
         [sock readDataToLength:1 withTimeout:-1 tag:TAG_PREFIX];
+    }
+}
+
+- (void)socket:(GCDAsyncSocket *)sock didWriteDataWithTag:(long)tag {
+    if (tag == TAG_HANDSHAKE) {
+        MCLogDebug(@"在线客户端：%zd", self.mdict.count);
     }
 }
 
@@ -314,6 +326,16 @@ completionHandler:(void (^)(BOOL shouldTrustPeer))completionHandler {
     uint8_t *buffer = (uint8_t *)frameData.mutableBytes;
     buffer[0] = WSMaskMask | opcode;
     return frameData;
+}
+
+- (void)tiemrPingAction:(id)sender {
+    [self.mdict.allValues enumerateObjectsUsingBlock:^(GCDAsyncSocket *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            NSData *timeData = [@([NSDate date].timeIntervalSince1970).stringValue dataUsingEncoding:NSUTF8StringEncoding];
+            NSData *sendData = [self createFrameWithOpcode:WSOpCodePing data:timeData];
+            [obj writeData:sendData withTimeout:0 tag:0];
+        });
+    }];
 }
 
 @end

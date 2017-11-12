@@ -34,7 +34,7 @@
     self.dbStream = [[MCWSStream alloc] init];
     [self.dbStream startWithDelegate:self port:1688];
     
-    self.timer = [NSTimer timerWithTimeInterval:0.1 target:self selector:@selector(tickAction:) userInfo:nil repeats:YES];
+    self.timer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(tickAction:) userInfo:nil repeats:YES];
     [[NSRunLoop mainRunLoop] addTimer:self.timer forMode:NSRunLoopCommonModes];
     
     self.logs = @[@{@"level":@(1), @"msg":@"普通信息"},
