@@ -7,14 +7,24 @@
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script type="text/javascript" src="client.js"></script>
 	<script type="text/javascript">
-		var logcss = ["info", "warn", "debug", "error"];
+		var logcss = ["info", "warn", "debug", "error", "default"];
 		jQuery(function(){
 			var log = new LogManager('ws://127.0.0.1:1688/log', onmessage);
+			document.title = title;
 		});		
 
 		function onmessage(obj) {
-			$("#logview").append("<p><span class='"+logcss[obj.level]+"'>"+obj.msg+"</span></p>");
-			$(window).scrollTop( $('#logview')[0].scrollHeight);
+			if(obj.level == 0) {						
+				$("#status").css("display","none");
+				$("#status").text("连接成功");	
+			}else if(obj.level == -1) {	
+				$("#status").css("display","block");
+				$("#status").text(obj.msg);			
+			} else {				
+				var msg = new Date(obj.time*1000).toLocaleString() + " " + obj.msg;
+				$("#logview").append("<p><span class='"+logcss[obj.level]+"'>"+msg+"</span></p>");
+				$(window).scrollTop( $('#logview')[0].scrollHeight);
+			}
 		}
 	</script>
 	<style type="text/css">
@@ -22,7 +32,7 @@ body {
     font: normal 11px auto "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
     color: #4f6b72;
     background: black;
-    margin: 10px;
+    margin: 0px;
 }
 a {
     color: #c75f3e;
@@ -93,6 +103,9 @@ th.specalt {
 .error {
     color: rgba(224,21,25,1.00);
 }
+		.default {
+			color: rgba(255,255,255,1);
+		}
 </style>
 	</head>
 	<body>
@@ -105,7 +118,8 @@ th.specalt {
   </table>
     </div>
 		
-	<div id="logview" style="height: 100%;height: 100%;">
+	<div id="status" style="background-color: #f1f1f1;width: 100%;padding: 6px 10px;color:#3eaaaf;position: fixed;bottom: 0px;"></div>
+	<div id="logview" style="height: 100%;height: 100%;margin-left: 10px;margin-bottom: 33px;">
     </div>
 </body>
 </html>

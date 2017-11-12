@@ -1,16 +1,14 @@
 PODS:
   - CocoaAsyncSocket (7.6.1)
-  - MCJSONKit (0.1.5)
   - MCLogger (0.1.2)
-  - MCWebSocket/NSLog (1.1.0):
-    - MCJSONKit
-    - MCWebSocket/standard
+  - MCWebSocket (1.1.0):
+    - MCWebSocket/standard (= 1.1.0)
   - MCWebSocket/standard (1.1.0):
     - CocoaAsyncSocket (~> 7.6.0)
     - MCLogger
 
 DEPENDENCIES:
-  - MCWebSocket/NSLog (from `../`)
+  - MCWebSocket (from `../`)
 
 EXTERNAL SOURCES:
   MCWebSocket:
@@ -18,10 +16,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   CocoaAsyncSocket: 7eadd3f59e1a6c84e2aefc93e9ff7b55156fe174
-  MCJSONKit: a41f7988e821498649032c2ae97f28d25df780d5
   MCLogger: 72b96167e7387dd6930b9996caf5440704ad4c97
-  MCWebSocket: 9cca9b2db3b1b1d4e5819070c6baeff1cb55da08
+  MCWebSocket: 37d5c2a369de678a2133c583f677dea5ea6b2eac
 
-PODFILE CHECKSUM: 3efcfa003b5ecbc744c3a1475e1a34302ff94226
+PODFILE CHECKSUM: 46da0a612e800906af17ef37f239e0fce5246ef6
 
 COCOAPODS: 1.3.1
