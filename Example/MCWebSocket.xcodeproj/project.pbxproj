@@ -24,6 +24,7 @@
 		71719F9F1E33DC2100824A3D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 71719F9D1E33DC2100824A3D /* LaunchScreen.storyboard */; };
 		873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 873B8AEA1B1F5CCA007FD442 /* Main.storyboard */; };
 		9C4358F38E37AE14BAFB941A /* libPods-MCWebSocket_Example.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 21CAE8B44E77128AF1D2E4CE /* libPods-MCWebSocket_Example.a */; };
+		C5717E6A1FC11808009E25B8 /* MCDBViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C5717E691FC11808009E25B8 /* MCDBViewController.m */; };
 		C599F3EC1FADB81B00D19382 /* websocket.html in Resources */ = {isa = PBXBuildFile; fileRef = C599F3EB1FADB54F00D19382 /* websocket.html */; };
 /* End PBXBuildFile section */
 
@@ -65,6 +66,8 @@
 		AD6A6E7ECDD4EE7A0E9331E3 /* Pods-MCWebSocket_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MCWebSocket_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-MCWebSocket_Example/Pods-MCWebSocket_Example.release.xcconfig"; sourceTree = "<group>"; };
 		B1CE9EF503398210074E8963 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		B92C04CC3C1CDDD5439064EC /* Pods-MCWebSocket_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MCWebSocket_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MCWebSocket_Tests/Pods-MCWebSocket_Tests.release.xcconfig"; sourceTree = "<group>"; };
+		C5717E681FC11808009E25B8 /* MCDBViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MCDBViewController.h; sourceTree = "<group>"; };
+		C5717E691FC11808009E25B8 /* MCDBViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MCDBViewController.m; sourceTree = "<group>"; };
 		C599F3EB1FADB54F00D19382 /* websocket.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = websocket.html; path = MCWebSocket/websocket.html; sourceTree = SOURCE_ROOT; };
 		CE49BD4C03FB2ABF6608669F /* Pods-MCWebSocket_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MCWebSocket_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MCWebSocket_Example/Pods-MCWebSocket_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		CF772ADCF156DEE8F5E835DD /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
@@ -150,6 +153,8 @@
 				873B8AEA1B1F5CCA007FD442 /* Main.storyboard */,
 				6003F5A5195388D20070C39A /* MCViewController.h */,
 				6003F5A6195388D20070C39A /* MCViewController.m */,
+				C5717E681FC11808009E25B8 /* MCDBViewController.h */,
+				C5717E691FC11808009E25B8 /* MCDBViewController.m */,
 				71719F9D1E33DC2100824A3D /* LaunchScreen.storyboard */,
 				6003F5A8195388D20070C39A /* Images.xcassets */,
 				6003F594195388D20070C39A /* Supporting Files */,
@@ -413,6 +418,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C5717E6A1FC11808009E25B8 /* MCDBViewController.m in Sources */,
 				6003F59E195388D20070C39A /* MCAppDelegate.m in Sources */,
 				6003F5A7195388D20070C39A /* MCViewController.m in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,

@@ -60,6 +60,7 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
 #define TAG_PAYLOAD_LENGTH64    205
 #define TAG_MASKEDKEY           206
 #define TAG_PAYLOAD             207
+#define TAG_PAYLOAD_PONE        208
 
 #import <CocoaAsyncSocket/GCDAsyncSocket.h>
 
@@ -140,7 +141,7 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
  * Not called if there is an error.
  **/
 - (void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag {
-    MCLogWarn(@"%ld", tag);
+    MCLogInfo(@"%ld", tag);
     if (tag == TAG_HANDSHAKE) {
         NSString *reqString = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
         NSArray<NSString *> *allHeaders = [reqString componentsSeparatedByString:@"\r\n"];
@@ -167,11 +168,11 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
             WSOpCode opcode = frame & WSOpCodeMask;
             switch (opcode) {
                 case WSOpCodePing:
-                    MCLogInfo(@"WSOpCodePing");
+                    MCLogWarn(@"WSOpCodePing");
                     break;
                 case WSOpCodePong:
-                    MCLogInfo(@"WSOpCodePong");
-                    [sock readDataToLength:1 withTimeout:-1 tag:TAG_PAYLOAD_LENGTH];
+                    MCLogWarn(@"WSOpCodePong");
+                    [sock readDataWithTimeout:-1 tag:TAG_PAYLOAD_PONE];
                     break;
                 case WSOpCodeConnectionClose:
                     [sock disconnectAfterReading];
@@ -228,6 +229,8 @@ static const uint8_t WSPayloadLenMask   = 0x7F;
         MCWSFrame *wsFrame = sock.userData;
         wsFrame.maskKey = data.copy;
         [sock readDataToLength:wsFrame.payloadLength withTimeout:-1 tag:TAG_PAYLOAD];
+    }else if (tag == TAG_PAYLOAD_PONE) {
+        
     }else if (tag == TAG_PAYLOAD) {
         MCWSFrame *wsFrame = sock.userData;
         uint8_t *mask = (uint8_t *)wsFrame.maskKey.bytes;

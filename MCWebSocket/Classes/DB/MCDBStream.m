@@ -7,7 +7,7 @@
 
 #import "MCDBStream.h"
 #import "FMDB.h"
-#import "MCJSONKit.h"
+#import "DBQueryModel.h"
 
 @interface MCDBStream () <MCWSStreamDelegate>
     
@@ -26,7 +26,7 @@
 - (void)setDbPath:(NSString *)dbPath {
     _dbPath = dbPath;
     
-    if (!_dbQueue) {
+    if (!_dbQueue || ![dbPath isEqualToString:_dbQueue.path]) {
         _dbQueue = [FMDatabaseQueue databaseQueueWithPath:self.dbPath];
     }
 }
@@ -44,19 +44,30 @@
         [db executeStatements:@"CREATE TABLE \"main\".\"CallLog\" (\n\t \"id\" INTEGER NOT NULL,\n\t \"time\" integer,\n\t \"sql\" TEXT,\n\tPRIMARY KEY(\"id\")\n);\n\nINSERT INTO \"CallLog\" VALUES (1, strftime('%s', 'now'), \'CREATE TABLE \"main\".\"CallLog\" (\n\t \"id\" INTEGER NOT NULL,\n\t \"time\" integer,\n\t \"sql\" TEXT,\n\tPRIMARY KEY(\"id\")\n);\');"];
     }];
 }
+
+- (void)fetchAllDBFiles:(long)tag {
+    NSString *curPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"];
+    NSMutableDictionary *mdict = [NSMutableDictionary dictionaryWithObjectsAndKeys:@(0), @"code", nil];
+    NSMutableArray *marr = [NSMutableArray array];
+    for (NSString *name in [[NSFileManager defaultManager] enumeratorAtPath:curPath]) {
+        if ([name hasSuffix:@".db"] || [name hasSuffix:@".sqlite"]) {
+            MCLogDebug(@"%@", name);
+            [marr addObject:name];
+        }
+    }
     
-#pragma mark - MCWSStreamDelegate
+    [mdict setObject:marr forKey:@"data"];
     
-- (void)webSocket:(MCWSStream *)stream didHandshake:(BOOL)result {
-    MCLogInfo(@"握手成功");
+    [self sendMessage:[mdict mc_JSONString] withTag:tag];
 }
-    
-- (void)webSocket:(MCWSStream *)stream didReceiveMessage:(NSString *)message withTag:(long)tag {
+
+- (void)executeCommand:(DBQueryModel *)model tag:(long)tag {
+    self.dbPath = [NSHomeDirectory() stringByAppendingFormat:@"/Documents/%@",model.dbPath];
     [_dbQueue inDatabase:^(FMDatabase * _Nonnull db) {
         NSMutableDictionary *mdict = [NSMutableDictionary dictionaryWithObjectsAndKeys:@(0), @"code", nil];
         @try {
-            [db executeUpdate:@"insert into CallLog(time,sql) values(?,?)", @([NSDate date].timeIntervalSince1970), message];
-            FMResultSet *rs = [db executeQuery:message];
+            [db executeUpdate:@"insert into CallLog(time,sql) values(?,?)", @([NSDate date].timeIntervalSince1970), model.sqlCommand];
+            FMResultSet *rs = [db executeQuery:model.sqlCommand];
             NSMutableArray *marr = [NSMutableArray array];
             while ([rs next]) {
                 if (marr.count == 0) {
@@ -79,9 +90,26 @@
             [mdict setObject:exception.reason forKey:@"msg"];
             [mdict setObject:@(-1) forKey:@"code"];
         } @finally {
-            [stream sendMessage:mdict.mc_JSONString withTag:tag];
+            [self sendMessage:mdict.mc_JSONString withTag:tag];
         }
     }];
+}
+    
+#pragma mark - MCWSStreamDelegate
+    
+- (void)webSocket:(MCWSStream *)stream didHandshake:(BOOL)result {
+    MCLogInfo(@"握手成功");
+}
+    
+- (void)webSocket:(MCWSStream *)stream didReceiveMessage:(NSString *)message withTag:(long)tag {
+    DBQueryModel *queryModel = [DBQueryModel co_objectFromKeyValues:message];
+    if (queryModel) {
+        if (queryModel.type == DBFileList) {
+            [self fetchAllDBFiles:tag];
+        }else if (queryModel.type == DBExecuteCmd) {
+            [self executeCommand:queryModel tag:tag];
+        }
+    }
 }
 
 @end

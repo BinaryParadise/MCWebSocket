@@ -9,9 +9,24 @@
 	<script type="text/javascript">
 		var logcss = ["info", "warn", "debug", "error", "default"];
 		jQuery(function(){
-			var log = new LogManager('ws://127.0.0.1:1688/log', onmessage);
+			//var log = new LogManager('ws://127.0.0.1:1688/log', onmessage);
+			var db = new DBManager('ws://127.0.0.1:1688/db', db_onmessage);
 			document.title = title;
-		});		
+		});
+		
+		function db_onmessage(obj) {
+			if(obj.level == 0) {
+				$("#status").css("display","none");
+				$("#status").text("连接成功");	
+			}else if(obj.level == -1) {	
+				$("#status").css("display","block");
+				$("#status").text(obj.msg);			
+			} else {				
+				var msg = new Date(obj.time*1000).toLocaleString() + " " + obj.msg;
+				$("#logview").append("<p><span class='"+logcss[obj.level]+"'>"+msg+"</span></p>");
+				$(window).scrollTop( $('#logview')[0].scrollHeight);
+			}
+		}
 
 		function onmessage(obj) {
 			if(obj.level == 0) {						
