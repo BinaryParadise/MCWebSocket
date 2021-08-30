@@ -60,7 +60,7 @@ Websocket协议通过序列化的数据帧传输数据。数据封包协议中�
 具体数据帧格式如下图：
 ![Base Framing Protocl](images/base-framing-protocol.png)
 
-主要用到位运算：亦或、逻辑与、逻辑或
+主要用到位运算：异或、逻辑与、逻辑或
 
 ## License
 

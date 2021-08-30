@@ -1,10 +1,12 @@
 Pod::Spec.new do |s|
 
 	s.name         = "MCWebSocket"
-	s.version      = "1.1.1"
+	s.version      = "1.2.0"
 	s.summary      = "MCWebSocket is a objective-c implementation of the WebSocket protocol."
 	s.description  = 'websocket protocol rfc4655(https://tools.ietf.org/html/rfc6455).
-	实现了websocket协议，顺便学习下，一点点写吧，还有很多没有完成的地方，主要英语太差了很多资料都看不懂'
+	实现了websocket协议，顺便学习下，一点点写吧，还有很多没有完成的地方，主要英语太差了很多资料都看不懂
+	2021年08月30日改为swift实现
+	'
 	
 	s.homepage     = "https://github.com/mylcode/MCWebSocket"
 	s.license      = { :type => 'MIT', :file => 'LICENSE'}
@@ -18,18 +20,7 @@ Pod::Spec.new do |s|
 	s.default_subspec = 'standard'
 	s.requires_arc = true
 
-	s.subspec 'standard' do |ss|
-    	ss.source_files = 'MCWebSocket/Classes/*'
-    	ss.exclude_files    = 'MCWebSocket/Classes/DB/*'
-    	ss.dependency   'CocoaAsyncSocket', '~> 7.6.0'
-        ss.dependency   'MCLogger'
-  	end
-
-	s.subspec 'DB' do |ss|
-		ss.source_files = 'MCWebSocket/Classes/DB/*'
-		ss.dependency   'MCWebSocket/standard'
-        ss.dependency   'FMDB'
-        ss.dependency   'MCJSONKit'
-	end
+    s.source_files = 'Sources/**/*'
+    #TODO: PracticeTLS pod
 
 end

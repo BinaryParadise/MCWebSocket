@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta charset="UTF-8">
+    <title>WebSocket客户端调试</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="wstool.js"></script>
+    <script type="text/javascript">
+        var logcss = ["info", "warn", "debug", "error", "default"];
+        jQuery(function () {
+            var log = new LogManager('ws://192.168.2.1:8443/log', onmessage, true);
+            document.title = title;
+        });
+
+        function onmessage(obj) {
+            var msg = new Date().toLocaleString() + " " + obj.msg;
+            $("#logview").append("<p><span class='" + logcss[obj.level] + "'>" + msg + "</span></p>");
+            $(window).scrollTop($('#logview')[0].scrollHeight);
+        }
+    </script>
+    <style type="text/css">
+        body {
+            font: normal 11px auto "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+            color: #4f6b72;
+            background: black;
+            margin: 0px;
+        }
+
+        a {
+            color: #c75f3e;
+        }
+
+        #mytable {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        caption {
+            padding: 0 0 5px 0;
+            width: 100%;
+            font: italic 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+            text-align: right;
+        }
+
+        th {
+            font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+            color: #4f6b72;
+            border-right: 1px solid #C1DAD7;
+            border-bottom: 1px solid #C1DAD7;
+            border-top: 1px solid #C1DAD7;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: left;
+            padding: 6px 6px 6px 12px;
+            background: #CAE8EA no-repeat;
+        }
+
+        th.nobg {
+            border-top: 0;
+            border-left: 0;
+            border-right: 1px solid #C1DAD7;
+            background: none;
+        }
+
+        td {
+            border-right: 1px solid #C1DAD7;
+            border-bottom: 1px solid #C1DAD7;
+            background: #fff;
+            font-size: 11px;
+            padding: 6px 6px 6px 12px;
+            color: #4f6b72;
+        }
+
+        td.alt {
+            background: #F5FAFA;
+            color: #797268;
+        }
+
+        th.spec {
+            border-left: 1px solid #C1DAD7;
+            border-top: 0;
+            background: #fff no-repeat;
+            font: bold 10px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+        }
+
+        th.specalt {
+            border-left: 1px solid #C1DAD7;
+            border-top: 0;
+            background: #f5fafa no-repeat;
+            font: bold 10px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+            color: #797268;
+        }
+
+        .info {
+            color: rgba(85, 85, 75, 1.00);
+        }
+
+        .warn {
+            color: rgba(198, 125, 72, 1);
+        }
+
+        .debug {
+            color: rgba(120, 109, 196, 1.00);
+        }
+
+        .error {
+            color: rgba(224, 21, 25, 1.00);
+        }
+
+        .default {
+            color: rgba(255, 255, 255, 1);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="p" style="display: none;">
+        <textarea id="sql" rows="10"
+            style="width:95%;">select id,datetime(time,'unixepoch','localtime') as time,sql from CallLog</textarea>
+        <button onclick="sendMessage()" style="width: 68px;height: 36px;">执行</button>
+    </div>
+    <div id="result">
+        <table id="rstable" cellspacing="0">
+        </table>
+    </div>
+
+    <div id="status"
+        style="background-color: #f1f1f1;width: 100%;padding: 6px 10px;color:#3eaaaf;position: fixed;bottom: 0px;">
+    </div>
+    <div id="logview" style="height: 100%;height: 100%;margin-left: 10px;margin-bottom: 33px;">
+    </div>
+</body>
+
+</html>
