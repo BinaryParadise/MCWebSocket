@@ -7,5 +7,5 @@
 
 import MCWebSocket
 
-let server = WebSocketServer()
+let server = WebSocketServer(tls: true)
 server.start(on: 8443).wait()

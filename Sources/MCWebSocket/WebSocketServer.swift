@@ -34,8 +34,7 @@ enum RWTags {
 }
 
 public class WebSocketServer: NSObject {
-    var socket: GCDAsyncSocket?
-    var current: GCDAsyncSocket?
+    var acceptSocket: GCDAsyncSocket?
     
     public init(tls: Bool = false) {
         super.init()
@@ -46,13 +45,13 @@ public class WebSocketServer: NSObject {
             TLSSessionManager.shared.delegate = self
         }
         
-        socket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.global())
-        socket?.isIPv6Enabled = false
+        acceptSocket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.global())
+        acceptSocket?.isIPv6Enabled = false
     }
     
     @discardableResult public func start(on port: UInt16) -> Self {
         do {
-            try socket?.accept(onPort: port)
+            try acceptSocket?.accept(onPort: port)
         } catch {
             LogError(error.localizedDescription)
         }
@@ -65,7 +64,7 @@ public class WebSocketServer: NSObject {
         return false
     }
     
-    func handshake(_ data: Data, sock: GCDAsyncSocket) {
+    func handshake(_ data: Data) -> String? {
         let request = String(data: data, encoding: .ascii)
         if let allHeaders = request?.components(separatedBy: "\r\n\r\n").first?.appending("").split(separator: "\r\n") {
             if let secKey = allHeaders.first { sub in
@@ -80,9 +79,10 @@ public class WebSocketServer: NSObject {
                     """
                     .replacingOccurrences(of: "\n", with: "\r\n")
                     .appending("\r\n\r\n")
-                sock.write(response.data(using: .ascii), withTimeout: 3, tag: RWTags.handshake.rawValue)
+                return response
             }
         }
+        return nil
     }
     
     func opcode(_ op: OpCode, data: Data, sock: GCDAsyncSocket) {
@@ -101,38 +101,38 @@ public class WebSocketServer: NSObject {
     }
 }
 
-extension WebSocketServer: GCDAsyncSocketDelegate, TLSConnectionDelegate {
+extension WebSocketServer: GCDAsyncSocketDelegate {
     
     public func socket(_ sock: GCDAsyncSocket, didAcceptNewSocket newSocket: GCDAsyncSocket) {
+        LogInfo("")
         if TLSSessionManager.shared.identity == nil {
-            current = newSocket
-            newSocket.readData(withTimeout: 3, tag: RWTags.handshake.rawValue)
+            newSocket.read(tag: .handshake)
         } else {
-            TLSSessionManager.shared.acceptConnection(sock)
+            TLSSessionManager.shared.acceptConnection(newSocket)
         }
     }
     
     public func socket(_ sock: GCDAsyncSocket, didRead data: Data, withTag tag: Int) {
         switch RWTags(rawValue: UInt8(tag)) {
         case .handshake:
-            handshake(data, sock: sock)
+            if let res = handshake(data) {
+                sock.write(data: res.data(using: .utf8)?.bytes, tag: .handshake)
+            }
         case .frame(_):
             let frame = WebSocketFrame(data)
             switch frame.opcode {
             case .textFrame:
-                LogInfo(String(data: Data(frame.payloadData) ?? Data(), encoding: .utf8) ?? "")
+                LogInfo(String(data: Data(frame.payloadData) , encoding: .utf8) ?? "")
                 sock.read(tag: .frame(.textFrame))
             case .binaryFrame:
                 LogInfo("binary[\(frame.length)]")
-                sock.read(tag: .frame(.binaryFrame))
-                sock.write(data: WebSocketFrame(opcode: .binaryFrame, data: "ok".bytes).rawBytes(), tag: .frame(.binaryFrame))
             case .close:
                 sock.disconnectAfterReadingAndWriting()
             case .ping:
                 break
             case .pong:
                 let ret = WebSocketFrame(opcode: .pong, data: [0x01])
-                sock.write(Data(ret.rawBytes()), withTimeout: -1, tag: RWTags.frame(.pong).rawValue)
+                sock.write(data: ret.rawBytes(), tag: .frame(.pong))
             }
         break
         }
@@ -145,8 +145,10 @@ extension WebSocketServer: GCDAsyncSocketDelegate, TLSConnectionDelegate {
         case .handshake:
             let f = WebSocketFrame(opcode: .textFrame, data: "Hello,World!".bytes)
             sock.write(data: f.rawBytes(), tag: .frame(f.opcode))
-        case .frame(_):
-            sock.read(tag: .frame(.textFrame))
+        case .frame(let type):
+            if type == .pong {
+                sock.read(tag: .frame(.textFrame))
+            }
             break
         default:
             break
@@ -157,8 +159,63 @@ extension WebSocketServer: GCDAsyncSocketDelegate, TLSConnectionDelegate {
         LogError("\(err)")
     }
     
-    public func onReceive(application data: [UInt8], userInfo: [String : AnyHashable]) -> [UInt8]? {
-        return nil
+    
+    
+    public func didWrite(_ connection: TLSConnection, tag: Int) {
+        let wtag = RWTags(rawValue: UInt8(tag-100))
+        switch wtag {
+        case .handshake:
+            connection.writeApplication(data: "Hello,World!".bytes, tag: RWTags.frame(.textFrame).rawValue+100)
+        case .frame(_):
+            break
+        }
+    }
+}
+
+extension WebSocketServer: TLSConnectionDelegate {
+
+    public func didHandshakeFinished(_ connection: TLSConnection) {
+        connection.readApplication(tag: RWTags.handshake.rawValue)
+    }
+    
+    public func didReadApplicaton(_ data: [UInt8], connection: TLSConnection, tag: Int) {
+        let rtag = RWTags(rawValue: UInt8(tag))
+        switch rtag {
+        case .handshake:
+            if let res = handshake(Data(data)) {
+                connection.writeApplication(data: res.bytes, tag: RWTags.handshake.rawValue)
+            } else {
+                //TODO: 不支持请求方式
+            }
+        case .frame(_):
+            let frame = WebSocketFrame(Data(data))
+            switch frame.opcode {
+            case .textFrame:
+                LogInfo(String(data: Data(frame.payloadData) , encoding: .utf8) ?? "")
+            case .binaryFrame:
+                LogInfo("binary[\(frame.length)]")
+            case .close:
+                connection.sock.disconnectAfterReadingAndWriting()
+            break
+            case .ping:
+                let ret = WebSocketFrame(opcode: .pong, data: [0x01])
+                connection.writeApplication(data: ret.rawBytes(), tag: RWTags.frame(.textFrame).rawValue)
+            case .pong:
+                break
+            }
+        }
+    }
+    
+    public func didWriteApplication(_ connection: TLSConnection, tag: Int) {
+        let wtag = RWTags(rawValue: UInt8(tag))
+        switch wtag {
+        case .handshake:
+            let f = WebSocketFrame(opcode: .textFrame, data: "Hello,World!".bytes)
+            connection.writeApplication(data: f.rawBytes(), tag: RWTags.frame(.textFrame).rawValue)
+        case .frame(_):
+            connection.readApplication(tag: RWTags.frame(.textFrame).rawValue)
+            break
+        }
     }
 }
 
