@@ -12,11 +12,11 @@
       },
       {
         "package": "CryptoSwift",
-        "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
+        "repositoryURL": "https://github.com/BinaryParadise/CryptoSwift.git",
         "state": {
           "branch": null,
-          "revision": "8d4f6384e0a8cc41f2005247241dd553963a492a",
-          "version": "1.4.1"
+          "revision": "b16d6ee408a363661d7b631c5b9be96a2c4f2f44",
+          "version": "1.4.2"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/BinaryParadise/PracticeTLS.git",
         "state": {
           "branch": null,
-          "revision": "835815ec82c9648d389af4e790e1491f410ba62d",
-          "version": "1.0.2"
+          "revision": "b2e247fd5fbebe34413468266035263d4c0ede4c",
+          "version": "1.0.5"
         }
       },
       {
@@ -33,8 +33,17 @@
         "repositoryURL": "https://github.com/onevcat/Rainbow",
         "state": {
           "branch": null,
-          "revision": "7c3dad0e918534c6d19dd1048bde734c246d05fe",
-          "version": "4.0.0"
+          "revision": "e0dada9cd44e3fa7ec3b867e49a8ddbf543e3df3",
+          "version": "4.0.1"
+        }
+      },
+      {
+        "package": "SwiftHpack",
+        "repositoryURL": "https://github.com/BinaryParadise/swift-hpack.git",
+        "state": {
+          "branch": null,
+          "revision": "1cab702665c4ff3dc290ce9861479c8daae200f0",
+          "version": "0.1.3"
         }
       }
     ]

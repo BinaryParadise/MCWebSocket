@@ -178,7 +178,7 @@ extension WebSocketServer: TLSConnectionDelegate {
         connection.readApplication(tag: RWTags.handshake.rawValue)
     }
     
-    public func didReadApplicaton(_ data: [UInt8], connection: TLSConnection, tag: Int) {
+    public func didReadApplication(_ data: [UInt8], connection: TLSConnection, tag: Int) {
         let rtag = RWTags(rawValue: UInt8(tag))
         switch rtag {
         case .handshake:
