@@ -30,30 +30,37 @@ class WebSocketFrame {
     var rsv1: Bool = false
     var rsv2: Bool = false
     var rsv3: Bool = false
-    var opcode: OpCode
+    var opcode: OpCode = .textFrame
     var mask: Bool = false
     var valid: Bool = true
     var length: UInt64
     var maskingKey: [UInt8] = []
     var payloadData: [UInt8] = []
+    /// 粘包处理
+    static var buffer: [UInt8] = []
     
-    init(_ data: Data) {
-        let stream = DataStream(data)
+    init?(_ data: [UInt8]) {
+        WebSocketFrame.buffer.append(contentsOf: data)
+        let stream = WebSocketFrame.buffer.stream
         let head = stream.readByte()!
         fin = head & 0b10000000 != 0
         rsv1 = head & 0b01000000 != 0
         rsv2 = head & 0b00100000 != 0
         rsv3 = head & 0b00010000 != 0
-        opcode = OpCode(rawValue: head & OpCodeMask) ?? .binaryFrame
+        if let oc = OpCode(rawValue: head & OpCodeMask) {
+            opcode = oc
+        } else {
+            return nil
+        }
                 
         valid = Self.isValid(head)
         
-        mask = data[1] & MaskMask != 0
+        guard let second = stream.readByte() else { return nil}
         
-        let payloadLen = data[1] & PayloadLenMask
+        mask = second & MaskMask != 0
         
-        _ = stream.readByte()
-        
+        let payloadLen = second & PayloadLenMask
+                
         if payloadLen < 126 {
             length = UInt64(payloadLen)
         } else if payloadLen == 126 {
@@ -61,13 +68,26 @@ class WebSocketFrame {
         } else {
             length = UInt64(stream.read(count: 8)!.int64Value)
         }
-        maskingKey = stream.read(count: 4)!
+        if mask {
+            if let maskKey = stream.read(count: 4) {
+                maskingKey = maskKey
+            } else {
+                return nil
+            }
+        }
                 
-        payloadData = stream.readToEnd() ?? []
-        //反掩码
-        for i in 0..<length {
-            payloadData[Int(i)] = payloadData[Int(i)] ^ maskingKey[Int(i % 4)]
-        }        
+        if UInt64(stream.position) + length > stream.data.count {
+            return nil
+        }
+                
+        if let payload = stream.read(count: Int(length)) {
+            payloadData = payload
+            //反掩码
+            for i in 0..<length {
+                payloadData[Int(i)] = payloadData[Int(i)] ^ maskingKey[Int(i % 4)]
+            }
+        }
+        WebSocketFrame.buffer.removeAll()
     }
     
     init(opcode: OpCode, data: [UInt8]) {

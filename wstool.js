@@ -1,50 +1,4 @@
 var title = "WebSocket客户端示例";
-function startWS(url, binary) {
-	var client;
-	if (WebSocket != undefined) {
-		client = new WebSocket(url);
-	} else {
-		client = new window.MozWebSocket(url);
-	}
-	if (binary) {
-		client.binaryType = "arraybuffer";
-	}
-	client.onopen = function () {
-		console.log(client.url + " 连接成功...");
-	};
-
-	client.onerror = function (event) {
-		console.error(event);
-	};
-
-	client.onclose = function (event) {
-		console.log(event);
-	};
-
-	client.onmessage = function (event) {
-		var obj = eval('(' + event.data + ')');
-		if (obj.code == 0) {
-			var data = obj.data;
-			var result = "<tr>";
-			for (var i = 0; i < data[0].length; i++) {
-				result += "<th scope='col'>" + data[0][i] + "</th>";
-			}
-			result += "</tr>";
-			for (var i = 1; i < data.length; i++) {
-				result += "<tr>";
-				for (var item in data[i]) {
-					result += "<td>" + data[i][item] + "</td>";
-				}
-				result += "</tr>";
-			}
-
-			$("#rstable").html(result);
-		} else {
-			$("#rstable").text(obj.msg);
-		}
-
-	};
-}
 
 function sendMessage() {
 	if (client != undefined) {
@@ -79,7 +33,7 @@ function LogManager(url, onmessage, binary) {
 		this.client = client;
 
 		client.onopen = function () {
-			console.log(client.url + " 连接成功...");
+            this.send(str2ab("abcdefghijkmlnopqrstuvwxyz"))
 			log.onmessage({ level: 0, msg: client.url + " 连接成功..." });
 		};
 
@@ -97,7 +51,6 @@ function LogManager(url, onmessage, binary) {
 			log.onmessage({
 				level: typeof event.data == "string" ? 1 : 2, msg: event.data
 			})
-			this.send(str2ab(JSON.stringify({ level: 1, msg: 'ok' })))
 		};
 	};
 
@@ -107,11 +60,11 @@ function LogManager(url, onmessage, binary) {
 }
 
 // 字符串转为ArrayBuffer对象，参数为字符串
-const str2ab = function(str) {
+const str2ab = function (str) {
 	var buf = new ArrayBuffer(str.length * 2); // 每个字符占用2个字节
-	var bufView = new Uint16Array(buf);
+	var bufView = new Uint8Array(buf);
 	for (var i = 0, strLen = str.length; i < strLen; i++) {
-	  bufView[i] = str.charCodeAt(i);
+		bufView[i] = str.charCodeAt(i);
 	}
-	return buf;
-  }
+	return bufView;
+}
