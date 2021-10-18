@@ -9,6 +9,7 @@ import Foundation
 import PracticeTLS
 import Socket
 import Crypto
+import CoreFoundation
 
 enum RWTags {
     typealias RawValue = UInt8
