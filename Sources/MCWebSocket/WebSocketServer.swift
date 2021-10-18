@@ -42,14 +42,20 @@ protocol WebSocketStream {
     func disconnect()
 }
 
+public protocol WebSocketDelegate {
+    func didReceive(data: [UInt8])
+}
+
 public class WebSocketServer: NSObject {
     var acceptSocket: Socket?
     var sessions: [Int : WebSocketStream] = [:]
     var terminated: Bool = false
     let socketQueue = DispatchQueue(label: "WebSocketQueue")
+    var delegate: WebSocketDelegate?
     
-    public init(tls: Bool = false) {
+    public init(tls: Bool = false, delegate: WebSocketDelegate? = nil) {
         super.init()
+        self.delegate = delegate
         if tls {
             let bundle = Bundle(path: "\(Bundle(for: Self.self).resourcePath!)/MCWebSocket_MCWebSocket.bundle")!
             let identity = PEMFileIdentity(certificateFile: bundle.path(forResource: "Cert/localhost.crt", ofType: nil)!, privateKeyFile: bundle.path(forResource: "Cert/private.pem", ofType: nil)!)!
@@ -120,28 +126,36 @@ public class WebSocketServer: NSObject {
         }
     }
     
-    func asyncRead(_ socket: Socket, tag: RWTags) {
-        socketQueue.async { [weak self] in
-            self?.didReadData(data: socket.readData(tag), stream: socket, rtag: tag)
+    func asyncRead(_ socket: WebSocketStream, tag: RWTags) {
+        if socket is TLSConnection {
+            socket.readData(tag)
+        } else {
+            socketQueue.async { [weak self] in
+                self?.didReadData(data: socket.readData(tag), stream: socket, rtag: tag)
+            }
         }
     }
     
-    func asyncWrite(_ socket: Socket, data: [UInt8], tag: RWTags) {
-        socketQueue.async { [weak self] in
+    func asyncWrite(_ socket: WebSocketStream, data: [UInt8], tag: RWTags) {
+        if socket is TLSConnection {
             socket.writeData(data, tag: tag)
-            self?.didWrite(socket, rtag: tag)
+        } else {
+            socketQueue.async { [weak self] in
+                socket.writeData(data, tag: tag)
+                self?.didWrite(socket, rtag: tag)
+            }
         }
     }
     
     func didReadData(data: [UInt8], stream: WebSocketStream, rtag: RWTags) {
-        LogDebug("-> \(data.count)")
+        LogDebug("\(rtag) -> \(data.count)")
         //TODO:需要处理粘包
         switch rtag {
         case .handshake:
             if let res = handshake(Data(data)) {
-                stream.writeData(res.bytes, tag: .handshake)
+                asyncWrite(stream, data: res.bytes, tag: .handshake)
             } else {
-                stream.writeData(WebSocketFrame(opcode: .close, data: []).rawBytes(), tag: .frame(.binaryFrame))
+                asyncWrite(stream, data: WebSocketFrame(opcode: .close, data: []).rawBytes(), tag: .frame(.binaryFrame))
             }
         case .frame(_):
             if let frame = WebSocketFrame(data) {
@@ -149,27 +163,29 @@ public class WebSocketServer: NSObject {
                 case .textFrame:
                     LogInfo(String(data: Data(frame.payloadData) , encoding: .utf8) ?? "")
                 case .binaryFrame:
-                    LogInfo("binary[\(frame.length)]")
+                    delegate?.didReceive(data: data)
+                    asyncRead(stream, tag: .frame(.binaryFrame))
                 case .close:
                     stream.disconnect()
                 case .ping:
                     let ret = WebSocketFrame(opcode: .pong, data: frame.payloadData)
-                    stream.writeData(ret.rawBytes(), tag: .frame(.binaryFrame))
+                    asyncWrite(stream, data: ret.rawBytes(), tag: .frame(.binaryFrame))
                 case .pong:
                     break
                 }
             } else {
-                stream.readData(.frame(.binaryFrame))
+                asyncRead(stream, tag: .frame(.binaryFrame))
             }
         }
     }
     
     func didWrite(_ stream: WebSocketStream, rtag: RWTags) {
+        LogDebug("\(rtag)")
         switch rtag {
         case .handshake:
-            stream.readData(.frame(.binaryFrame))
+            asyncRead(stream, tag: .frame(.binaryFrame))
         case .frame(_):
-            stream.readData(.frame(.binaryFrame))
+            asyncRead(stream, tag: .frame(.binaryFrame))
         }
     }
 }

@@ -54,9 +54,17 @@ function LogManager(url, onmessage, binary) {
 		};
 	};
 
+	this.ping = function () {
+		if (client == undefined || client.readyState != 1) {
+			return;
+		}
+		this.client.send(str2ab("ping"))
+	}
+
 	window.logmgr = this;
 	this.open();
 	setInterval("window.logmgr.open()", 5000);
+	setInterval("window.logmgr.ping()", 5000);
 }
 
 // 字符串转为ArrayBuffer对象，参数为字符串

@@ -7,5 +7,11 @@
 
 import MCWebSocket
 
-let server = WebSocketServer(tls: true)
+class SimpleDelegate: WebSocketDelegate {
+    func didReceive(data: [UInt8]) {
+        print("\(#function) -> \(data.count)")
+    }
+}
+
+let server = WebSocketServer(tls: true, delegate: SimpleDelegate())
 server.start(on: 8443).wait()
