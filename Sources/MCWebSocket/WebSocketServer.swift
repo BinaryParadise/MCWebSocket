@@ -7,8 +7,8 @@
 
 import Foundation
 import PracticeTLS
-import CommonCrypto
 import Socket
+import Crypto
 
 enum RWTags {
     typealias RawValue = UInt8
@@ -203,12 +203,11 @@ extension WebSocketServer: TLSConnectionDelegate {
 
 extension String {
     func sha1AndBase64() -> Self {
-        let data = Data(self.utf8)
-        var digest = [UInt8](repeating: 0, count:Int(CC_SHA1_DIGEST_LENGTH))
-        data.withUnsafeBytes { p in
-            _ = CC_SHA1(p.baseAddress, CC_LONG(data.count), &digest)
+        let sha1 = Insecure.SHA1.hash(data: bytes)
+        let b = sha1.withUnsafeBytes { r in
+            [UInt8](r.bindMemory(to: UInt8.self))
         }
-        return digest.data.base64EncodedString()
+        return b.data.base64EncodedString()
     }
 }
 
