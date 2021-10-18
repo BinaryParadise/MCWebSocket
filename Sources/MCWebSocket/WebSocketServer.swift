@@ -7,8 +7,8 @@
 
 import Foundation
 import PracticeTLS
-import CocoaAsyncSocket
 import CommonCrypto
+import Socket
 
 enum RWTags {
     typealias RawValue = UInt8
@@ -34,7 +34,7 @@ enum RWTags {
 }
 
 protocol WebSocketStream {
-    func readData(_ tag: RWTags)
+    @discardableResult func readData(_ tag: RWTags) -> [UInt8]
     
     func writeData(_ data: [UInt8]?, tag: RWTags)
     
@@ -42,8 +42,10 @@ protocol WebSocketStream {
 }
 
 public class WebSocketServer: NSObject {
-    var acceptSocket: GCDAsyncSocket?
-    var sessions: [Int : GCDAsyncSocket] = [:]
+    var acceptSocket: Socket?
+    var sessions: [Int : WebSocketStream] = [:]
+    var terminated: Bool = false
+    let socketQueue = DispatchQueue(label: "WebSocketQueue")
     
     public init(tls: Bool = false) {
         super.init()
@@ -55,13 +57,20 @@ public class WebSocketServer: NSObject {
             TLSSessionManager.shared.isDebug = true
         }
         
-        acceptSocket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.global())
-        acceptSocket?.isIPv6Enabled = false
+        acceptSocket = try? Socket.create(family: .inet, type: .stream, proto: .tcp)
     }
     
     @discardableResult public func start(on port: UInt16) -> Self {
         do {
-            try acceptSocket?.accept(onPort: port)
+            try acceptSocket?.listen(on: Int(port))
+            socketQueue.async { [weak self] in
+                guard let self = self else { return }
+                repeat {
+                    if let newSocket = try? self.acceptSocket?.acceptClientConnection() {
+                        self.socket(didAcceptNewSocket: newSocket)
+                    }
+                } while !self.terminated
+            }
         } catch {
             LogError(error.localizedDescription)
         }
@@ -95,7 +104,7 @@ public class WebSocketServer: NSObject {
         return nil
     }
     
-    func opcode(_ op: OpCode, data: Data, sock: GCDAsyncSocket) {
+    func opcode(_ op: OpCode, data: Data, sock: WebSocketStream) {
         switch op {
         case .textFrame:
             break
@@ -107,6 +116,19 @@ public class WebSocketServer: NSObject {
             break
         case .pong:
             break
+        }
+    }
+    
+    func asyncRead(_ socket: Socket, tag: RWTags) {
+        socketQueue.async { [weak self] in
+            self?.didReadData(data: socket.readData(tag), stream: socket, rtag: tag)
+        }
+    }
+    
+    func asyncWrite(_ socket: Socket, data: [UInt8], tag: RWTags) {
+        socketQueue.async { [weak self] in
+            socket.writeData(data, tag: tag)
+            self?.didWrite(socket, rtag: tag)
         }
     }
     
@@ -151,29 +173,16 @@ public class WebSocketServer: NSObject {
     }
 }
 
-extension WebSocketServer: GCDAsyncSocketDelegate {
+extension WebSocketServer {
     
-    public func socket(_ sock: GCDAsyncSocket, didAcceptNewSocket newSocket: GCDAsyncSocket) {
+    public func socket(didAcceptNewSocket newSocket: Socket) {
         LogDebug("")
         if TLSSessionManager.shared.identity == nil {
-            sessions[Int(newSocket.socket4FD())] = newSocket
+            sessions[Int(newSocket.socketfd)] = newSocket
             newSocket.readData(.handshake)
         } else {
             TLSSessionManager.shared.acceptConnection(newSocket)
         }
-    }
-    
-    public func socket(_ sock: GCDAsyncSocket, didRead data: Data, withTag tag: Int) {
-        didReadData(data: data.bytes, stream: sock, rtag: RWTags(rawValue: UInt8(tag)))
-    }
-    
-    public func socket(_ sock: GCDAsyncSocket, didWriteDataWithTag tag: Int) {
-        didWrite(sock, rtag: RWTags(rawValue: UInt8(tag)))
-    }
-    
-    public func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
-        sessions.removeValue(forKey: Int(sock.socket4FD()))
-        LogError("\(String(describing: err))")
     }
 }
 
@@ -199,23 +208,41 @@ extension String {
         data.withUnsafeBytes { p in
             _ = CC_SHA1(p.baseAddress, CC_LONG(data.count), &digest)
         }
-        return digest.toBase64()
+        return digest.data.base64EncodedString()
     }
 }
 
-extension GCDAsyncSocket: WebSocketStream {
-    func readData(_ tag: RWTags) {
-        readData(withTimeout: -1, tag: tag.rawValue)
+extension Socket: WebSocketStream {
+    
+    @discardableResult func readData(_ tag: RWTags) -> [UInt8] {
+        do {
+            var data = Data()
+            try read(into: &data)
+            return data.bytes
+        } catch {
+            LogError("\(error)")
+        }
+        return []
     }
     
     func writeData(_ data: [UInt8]?, tag: RWTags) {
-        write(Data(data ?? []), withTimeout: -1, tag: tag.rawValue)
+        guard let data = data else { return }
+        do {
+            try write(from: Data(data))
+        } catch {
+            LogError("\(error)")
+        }
+    }
+    
+    func disconnect() {
+        close()
     }
 }
 
 extension TLSConnection: WebSocketStream {
-    func readData(_ tag: RWTags) {
+    @discardableResult func readData(_ tag: RWTags) -> [UInt8] {
         readApplication(tag: tag.rawValue)
+        return []
     }
     
     func writeData(_ data: [UInt8]?, tag: RWTags) {

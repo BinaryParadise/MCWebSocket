@@ -2,21 +2,12 @@
   "object": {
     "pins": [
       {
-        "package": "CocoaAsyncSocket",
-        "repositoryURL": "https://github.com/robbiehanson/CocoaAsyncSocket",
+        "package": "Socket",
+        "repositoryURL": "https://github.com/Kitura/BlueSocket.git",
         "state": {
           "branch": null,
-          "revision": "dbdc00669c1ced63b27c3c5f052ee4d28f10150c",
-          "version": "7.6.5"
-        }
-      },
-      {
-        "package": "CryptoSwift",
-        "repositoryURL": "https://github.com/BinaryParadise/CryptoSwift.git",
-        "state": {
-          "branch": null,
-          "revision": "b16d6ee408a363661d7b631c5b9be96a2c4f2f44",
-          "version": "1.4.2"
+          "revision": "dd924c3bc2c1c144c42b8dda3896f1a03115ded4",
+          "version": "2.0.2"
         }
       },
       {
@@ -24,8 +15,8 @@
         "repositoryURL": "https://github.com/BinaryParadise/PracticeTLS.git",
         "state": {
           "branch": null,
-          "revision": "9a23f1f272c8e186d58bb831fa09016a0a545466",
-          "version": "1.0.6"
+          "revision": "3318274d1845b6033085d1de98ed33ba048557d6",
+          "version": "1.0.8"
         }
       },
       {
@@ -35,6 +26,24 @@
           "branch": null,
           "revision": "e0dada9cd44e3fa7ec3b867e49a8ddbf543e3df3",
           "version": "4.0.1"
+        }
+      },
+      {
+        "package": "swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser",
+        "state": {
+          "branch": null,
+          "revision": "6b2aa2748a7881eebb9f84fb10c01293e15b52ca",
+          "version": "0.5.0"
+        }
+      },
+      {
+        "package": "swift-crypto",
+        "repositoryURL": "https://github.com/apple/swift-crypto.git",
+        "state": {
+          "branch": null,
+          "revision": "127d3745c37b5705e4bc8d16c7951c48dcc3332c",
+          "version": "2.0.0"
         }
       },
       {
